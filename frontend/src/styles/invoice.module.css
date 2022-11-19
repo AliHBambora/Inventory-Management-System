@@ -1,0 +1,63 @@
+.styled_table {
+  border-collapse: collapse;
+  margin: 25px 0;
+  font-size: 1.05em;
+  font-family: sans-serif;
+  min-width: 400px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.styled_table thead tr {
+  background-color: #009879;
+  color: #ffffff;
+  text-align: left;
+}
+
+.styled_table th,
+.styled_table td {
+  padding: 12px 15px;
+  border: 1px solid black;
+  /* border-radius: 15px; */
+}
+
+.styled_table tbody tr {
+  border-bottom: 1px solid #dddddd;
+}
+
+.styled_table tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+.styled_table tbody tr:last-of-type {
+  border-bottom: 2px solid #009879;
+}
+
+.NewInvoice_ButtonContainer {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.NewInvoice_GrandTotalContainer {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.GrandTotalBox {
+  display: flex;
+  width: 28%;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+input[name="GrandTotal"],input[name="SubTotal"],input[name="Total"]{
+  cursor:not-allowed;
+}
+
+.Unit{
+  width: 10%;
+}

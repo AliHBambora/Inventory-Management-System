@@ -1,0 +1,11 @@
+.AddNewCustomerModalOuter {
+  position: absolute;
+  border-radius: 10px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 410px;
+  background-color: white;
+  border: 2px solid silver;
+  padding: 20px 20px 10px 20px;
+}

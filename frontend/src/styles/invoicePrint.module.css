@@ -1,0 +1,70 @@
+.MainContainer{
+  padding:20px;
+}
+
+.InvoiceTitleContainer {
+  display: flex;
+  align-items: center;
+  width: 90%;
+  justify-content: space-between;
+  border-bottom: 1px solid grey;
+}
+
+.InvoiceLogoContainer {
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+}
+
+.InvoiceDetailsContainer{
+  display: flex;
+  flex-direction: column;
+  margin-top: 15px;
+}
+
+.InvoiceDetailRow{
+  display: flex;
+  align-items: center;
+}
+
+.InvoiceTableContainer{
+  margin-top: 15px;
+}
+
+.NewInvoice_GrandTotalContainer {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.GrandTotalBox {
+  display: flex;
+  width: 15%;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+}
+
+.GrandTotalText{
+  font-size:18px;
+  font-weight:bold;
+  margin:0;
+  color: black;
+}
+
+.NewInvoice_Signature{
+  margin-top: 50px;
+  width:"100%";
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.SignatureContainer{
+  width: 25%;
+  border-top: 1px solid black;
+  text-align: center;
+  padding-top: 10px;
+}
+

@@ -1,0 +1,20 @@
+.NewInvoice_Container{
+
+}
+
+.NewInvoice_TopContainer{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.NewInvoice_NameContainer{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+
