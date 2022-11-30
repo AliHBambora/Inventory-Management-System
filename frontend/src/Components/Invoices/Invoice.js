@@ -21,6 +21,7 @@ import { DataContext } from "../Context/DataContext";
 import app_constants from "../../constants/constants";
 import { getAllProducts } from "../../APIFunctions/GetAllProducts";
 import dayjs from "dayjs";
+import { bool } from "yup";
 
 const Invoice = ({
   invoiceDate,
@@ -30,6 +31,7 @@ const Invoice = ({
   customer,
   getTotalAmount,
   amountPaid,
+  generateInvoiceCallBack,
 }) => {
   const [openInvoicePrintDialog, setOpenInvoicePrintDialog] = useState(false);
   const [inputValue, setinputValue] = useState("");
@@ -53,7 +55,20 @@ const Invoice = ({
 
   const { products, setProducts } = useContext(DataContext);
 
-  useEffect(() => {}, [invoiceDetails]);
+  useEffect(() => {
+    const keyDownHandler = event => {
+      console.log('User pressed: ', event.key);
+
+      if (event.key === '+') {
+       AddItem();
+      }
+    };
+    document.addEventListener('keydown', keyDownHandler);
+    return () => {
+      document.removeEventListener('keydown', keyDownHandler);
+    };
+
+  }, [invoiceDetails]);
 
   useEffect(() => {
     getAllProducts().then((res) => {
@@ -75,7 +90,7 @@ const Invoice = ({
       if (index !== i) return item;
       return { ...item, [event.target.name]: event.target.value };
     });
-    if (event.target.name == "Qty" || event.target.name == "Price") {
+    if (event.target.name === "qty" || event.target.name === "price") {
       lineItems[index].total = lineItems[index].qty * lineItems[index].price;
       var result = 0;
       lineItems.map((item) => (result = result + item.total));
@@ -111,57 +126,75 @@ const Invoice = ({
     setSubTotal(subTotal - invoiceDetails[index].total);
     setGrandTotal(grandTotal - invoiceDetails[index].total);
     getTotalAmount(grandTotal - invoiceDetails[index].total);
-    //setGrandTotal(grandTotal-invoiceDetails[index].Total);
+  };
+
+  const validateInvoice = () => {
+    var arr = [];
+    var result = true;
+    if (invoiceNumber === "") {
+      arr.push("invoiceNumber");
+      result = false;
+    }
+    if (customer == null) {
+      arr.push("customer");
+      result = false;
+    }
+    generateInvoiceCallBack(arr);
+    return result;
   };
 
   const GenerateInvoice = async () => {
-    Swal.fire({
-      icon: "question",
-      title: "Are you sure you want to generate new invoice?",
-      showConfirmButton: true,
-      showCancelButton: true,
-      confirmButtonText: "Yes",
-      cancelButtonText: "Cancel",
-      confirmButtonColor:"green",
-      cancelButtonColor:"red"
-    }).then(async (res) => {
-      if (res.isConfirmed) {
-        const POSTOBJ = {
-          InvoiceNumber: invoiceNumber,
-          InvoiceDate: invoiceDate,
-          TotalAmount: grandTotal,
-          Discount: discount,
-          Status: invoiceType,
-          Comments: "",
-          customer: customer,
-          Profit: 0,
-          AmountPaid: amountPaid,
-          productList: invoiceDetails,
-        };
-        const res = await axios({
-          url: app_constants.API_URL + "api/Invoices/AddInvoice",
-          method: "POST",
-          headers: {
-            Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
-          },
-          data: POSTOBJ,
-        });
-        if (res.data.status == "Success") {
-          Swal.fire({
-            icon: "error",
-            text: res.data.Message,
-            timer: 1000,
+    if (!validateInvoice()) {
+      return;
+    } else {
+      Swal.fire({
+        icon: "question",
+        title: "Are you sure you want to generate new invoice?",
+        showConfirmButton: true,
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+        cancelButtonText: "Cancel",
+        confirmButtonColor: "green",
+        cancelButtonColor: "red",
+      }).then(async (res) => {
+        if (res.isConfirmed) {
+          const POSTOBJ = {
+            InvoiceNumber: invoiceNumber,
+            InvoiceDate: invoiceDate,
+            TotalAmount: grandTotal,
+            Discount: discount,
+            Status: invoiceType,
+            Comments: "",
+            customer: customer,
+            Profit: 0,
+            AmountPaid: amountPaid,
+            productList: invoiceDetails,
+          };
+          const res = await axios({
+            url: app_constants.API_URL + "api/Invoices/AddInvoice",
+            method: "POST",
+            headers: {
+              Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
+            },
+            data: POSTOBJ,
           });
-          setOpenInvoicePrintDialog(true);
-        } else {
-          Swal.fire({
-            icon: "error",
-            text: res.data.Message,
-          });
+          if (res.data.status == "Success") {
+            Swal.fire({
+              icon: "error",
+              text: res.data.Message,
+              timer: 1000,
+            });
+            setOpenInvoicePrintDialog(true);
+          } else {
+            Swal.fire({
+              icon: "error",
+              text: res.data.Message,
+            });
+          }
+          console.log(invoiceDetails);
         }
-        console.log(invoiceDetails);
-      }
-    });
+      });
+    }
   };
 
   const onProductSelection = (e, value, index) => {
@@ -178,7 +211,7 @@ const Invoice = ({
   const [toggle, setToggle] = useState(true);
 
   return (
-    <div className="NewInvoice_InvoiceContainer">
+    <div className="NewInvoice_InvoiceContainer" on>
       <table className={styles.styled_table}>
         <thead>
           <tr>
@@ -200,6 +233,7 @@ const Invoice = ({
                 <Autocomplete
                   value={item}
                   freeSolo
+                  auto
                   onChange={(e, value) => onProductSelection(e, value, index)}
                   inputValue={item?.name}
                   onInputChange={(event, newInputValue) => {
@@ -217,6 +251,9 @@ const Invoice = ({
                       {...params}
                       label="Select Product"
                       variant="outlined"
+                      focused
+                      size="small"
+                      // autoFocus
                     />
                   )}
                   // open={inputValue.length > 2}
@@ -226,7 +263,8 @@ const Invoice = ({
                 <TextField
                   // fullWidth
                   key={index}
-                  name="Description"
+                  focused
+                  name="description"
                   size="small"
                   id="outlined-name"
                   variant="outlined"
@@ -237,7 +275,8 @@ const Invoice = ({
               <td>
                 <TextField
                   // fullWidth
-                  name="Qty"
+                  name="qty"
+                  focused
                   size="small"
                   id="outlined-name"
                   variant="outlined"
@@ -246,14 +285,15 @@ const Invoice = ({
                 />
               </td>
               <td className={styles.Unit}>
-                <FormControl fullWidth>
+                <FormControl focused fullWidth>
                   <InputLabel id="demo-simple-select-label">Unit</InputLabel>
                   <Select
                     labelId="demo-simple-select-label"
+                    size="small"
                     id="demo-simple-select"
                     value={item.unit}
                     label="Age"
-                    name="Unit"
+                    name="unit"
                     onChange={(e) => handleInvoiceDetailsChanged(index, e)}
                   >
                     <MenuItem value={0}>Doz</MenuItem>
@@ -265,7 +305,8 @@ const Invoice = ({
                 <TextField
                   // fullWidth
                   key={index}
-                  name="Price"
+                  focused
+                  name="price"
                   size="small"
                   id="outlined-name"
                   variant="outlined"
@@ -276,8 +317,9 @@ const Invoice = ({
               <td>
                 <TextField
                   // fullWidth
+                  focused
                   key={index}
-                  name="Total"
+                  name="total"
                   size="small"
                   id="outlined-name"
                   variant="outlined"

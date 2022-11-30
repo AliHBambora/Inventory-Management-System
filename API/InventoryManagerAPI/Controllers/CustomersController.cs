@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using InventoryManagerAPI.Models;
 using Newtonsoft.Json;
+using InventoryManagerAPI.DTO;
 
 namespace InventoryManagerAPI.Controllers
 {
@@ -53,7 +54,7 @@ namespace InventoryManagerAPI.Controllers
                 {
                     return Ok(new { status = "failed", Message = "Customer not found" });
                 }
-                return Ok(new { status = "Success", result = customer });
+                return Ok(new { status = "Success", result = new CustomerDTO { ID=customer.CustomerId,Name = customer.Name, Address = customer.Address, Contact = customer.PhoneNo, Description = customer.Description } });
             }
             catch (Exception e)
             {
@@ -106,7 +107,7 @@ namespace InventoryManagerAPI.Controllers
             {
                 var customer = new Customer
                 {
-                    CustomerId  = Guid.NewGuid(),
+                    CustomerId = Guid.NewGuid(),
                     Name = data["Name"],
                     Address = data["Address"],
                     Description = data["Description"],
@@ -139,7 +140,7 @@ namespace InventoryManagerAPI.Controllers
                 await _context.SaveChangesAsync();
                 return Ok(new { status = "Success" });
             }
-           catch(Exception e)
+            catch (Exception e)
             {
                 return Ok(new { status = "failed", message = e.Message });
             }

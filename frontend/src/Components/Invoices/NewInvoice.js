@@ -14,10 +14,13 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
+import AddIcon from '@mui/icons-material/Add';
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+
 import Invoice from "./Invoice";
 import { DataContext } from "../Context/DataContext";
 import { getAllCustomers } from "../../APIFunctions/GetAllCustomers";
+import AddCustomerModal from "../modals/AddCustomerModal";
 
 const NewInvoice = () => {
   const [invoiceDate, setInvoiceDate] = useState(dayjs(new Date()));
@@ -25,13 +28,16 @@ const NewInvoice = () => {
   const [customerID, setCustomerID] = useState("");
   const [customer, setCustomer] = useState(null);
   const [invoiceNumber, setInvoiceNumber] = useState("");
-  const [invoiceType, setInvoiceType] = useState("Cash");
   const [invoiceNumberError, setInvoiceNumberError] = useState(false);
+  const [customerError, setCustomerError] = useState(false);
+
+  const [invoiceType, setInvoiceType] = useState("Cash");
   const [amountPaid, setAmountPaid] = useState(0);
   const [amountRemaining, setAmountRemaining] = useState(0);
-  const [invoiceTotal,setInvoiceTotal] = useState(0);
+  const [invoiceTotal, setInvoiceTotal] = useState(0);
   const [showAmountPaidOption, setShowAmountPaidOption] = useState(false);
-
+  const [customersLoading, setCustomersLoading] = useState(false);
+  const [openAddNewCustomer, setOpenAddNewCustomer] = useState(false);
   const { customers, setCustomers } = useContext(DataContext);
   // const handleSwitchChange = (event) => {
   //   setChecked(event.target.checked);
@@ -39,20 +45,35 @@ const NewInvoice = () => {
 
   useEffect(() => {
     if (customers.length == 0) {
+      setCustomersLoading(true);
       getAllCustomers().then((res) => {
         if (res.status == "success") {
           console.log(res.data);
           setCustomers(res.data);
         }
+        setCustomersLoading(false);
       });
     }
-    if(sessionStorage.getItem("Invoice")!=null){
+    if (sessionStorage.getItem("Invoice") != null) {
       var invoiceData = JSON.parse(sessionStorage.getItem("Invoice"));
       setCustomer(invoiceData.customer);
       setInvoiceNumber(invoiceData.invoiceNumber);
       setInvoiceDate(invoiceData.invoiceDate);
     }
   }, []);
+
+  const validateInvoice = (arr) => {
+    if (arr?.includes("invoiceNumber")) {
+      setInvoiceNumberError(true);
+    }
+    if (arr?.includes("customer")) {
+      setCustomerError(true);
+    }
+  };
+
+  const CloseModal = () => {
+    setOpenAddNewCustomer(false);
+  };
 
   return (
     <>
@@ -63,28 +84,19 @@ const NewInvoice = () => {
             <TextField
               // fullWidth
               error={invoiceNumberError}
+              helperText={invoiceNumberError ? "Enter Invoice number" : ""}
+              focused
               style={{ width: "30%" }}
               id="outlined-name"
               label="Invoice Number"
               variant="outlined"
               value={invoiceNumber}
-              onChange={(e) => setInvoiceNumber(e.target.value)}
+              onChange={(e) => {
+                setInvoiceNumber(e.target.value);
+                setInvoiceNumberError(false);
+              }}
             />
-            {/* <FormGroup>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={checked}
-                    onChange={handleSwitchChange}
-                    inputProps={{ "aria-label": "controlled" }}
-                    size="medium"
-                  />
-                }
-                label="Credit"
-              />
-            </FormGroup> */}
-
-            <FormControl sx={{ width: "30%" }}>
+            <FormControl focused sx={{ width: "30%" }}>
               <InputLabel id="demo-simple-select-label">
                 Invoice Type
               </InputLabel>
@@ -98,8 +110,7 @@ const NewInvoice = () => {
                   if (e.target.value === "Credit") {
                     setShowAmountPaidOption(true);
                     setAmountPaid(0);
-                  }
-                  else{
+                  } else {
                     setShowAmountPaidOption(false);
                     setAmountPaid(invoiceTotal);
                   }
@@ -119,7 +130,7 @@ const NewInvoice = () => {
                   console.log(newValue);
                 }}
                 renderInput={(params) => (
-                  <TextField sx={{ width: "30%" }} {...params} />
+                  <TextField sx={{ width: "30%" }} {...params} focused />
                 )}
               />
             </LocalizationProvider>
@@ -127,22 +138,14 @@ const NewInvoice = () => {
 
           {/* Name of the customer */}
           <div className={styles.NewInvoice_NameContainer}>
-            {/* <TextField
-              error={customerNameError}
-              helperText={customerNameError?"Enter customer name":""}
-              fullWidth
-              id="outlined-name"
-              label="Customer Name"
-              variant="outlined"
-              value={customerName}
-              onChange={(e) => setCustomerName(e.target.value)}
-            /> */}
+            <div className={styles.CustomerContainer}>
             <Autocomplete
-              style={{width:"30%"}}
+              style={{width:"100%"}}
               value={customer}
               onChange={(event, newValue) => {
                 console.log(newValue);
                 setCustomer(newValue);
+                setCustomerError(false);
               }}
               inputValue={customerName}
               onInputChange={(event, newInputValue) => {
@@ -152,37 +155,58 @@ const NewInvoice = () => {
               getOptionLabel={(option) => option.name}
               id="controllable-states-demo"
               options={customers}
-              
+              loading={customersLoading}
               renderInput={(params) => (
-                <TextField  {...params} label="Customer" />
+                <TextField
+                  {...params}
+                  label="Customer"
+                  error={customerError}
+                  helperText={customerError ? "Select Customer" : ""}
+                  focused
+                  fullWidth
+                />
               )}
             />
+            <IconButton
+              onClick={()=>setOpenAddNewCustomer(true)}
+            >
+              <AddIcon fontSize="small"/>
+            </IconButton>
+            </div>
             {/* <div style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between"}} hidden={!showAmountPaidOption}> */}
             <TextField
               fullWidth
-              style={showAmountPaidOption?{display:"block",width:"30%"}: {display:"none",width:"30%"}}
+              style={
+                showAmountPaidOption
+                  ? { display: "block", width: "30%" }
+                  : { display: "none", width: "30%" }
+              }
+              focused
               id="outlined-name"
               label="Amount Paid"
               variant="outlined"
               value={amountPaid}
               onChange={(e) => {
                 setAmountPaid(e.target.value);
-                setAmountRemaining(
-                  invoiceTotal - e.target.value
-                );
+                setAmountRemaining(invoiceTotal - e.target.value);
               }}
             />
 
             <TextField
               fullWidth
-              style={showAmountPaidOption?{display:"block",width:"30%"}: {display:"none",width:"30%"}}
+              focused
+              style={
+                showAmountPaidOption
+                  ? { display: "block", width: "30%" }
+                  : { display: "none", width: "30%" }
+              }
               id="outlined-name"
               label="Amount Remaining"
               variant="outlined"
               value={amountRemaining}
               disabled
             />
-            </div>
+          </div>
           {/* </div> */}
 
           <Invoice
@@ -191,9 +215,16 @@ const NewInvoice = () => {
             invoiceNumber={invoiceNumber}
             invoiceType={invoiceType}
             customer={customer}
-            getTotalAmount={(val)=>{setInvoiceTotal(val);setAmountRemaining(val-amountPaid)}}
+            getTotalAmount={(val) => {
+              setInvoiceTotal(val);
+              setAmountRemaining(val - amountPaid);
+            }}
+            generateInvoiceCallBack={(arr) => validateInvoice(arr)}
             amountPaid={amountPaid}
           />
+
+           {/* Add new Customer Modal */}
+     <AddCustomerModal open={openAddNewCustomer} CloseModal={CloseModal} isEdit={false} currCustomerID=""/>
         </div>
       </PerfectScrollbar>
     </>

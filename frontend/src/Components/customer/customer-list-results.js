@@ -4,7 +4,6 @@ import PropTypes from "prop-types";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import CloseIcon from "@mui/icons-material/Close";
 import styles from "../../styles/customer-list-results.module.css";
 import { Upload as UploadIcon } from "../icons/upload";
 import { Download as DownloadIcon } from "../icons/download";
@@ -37,6 +36,8 @@ import axios from "axios";
 import app_constants from "../../constants/constants";
 import Swal from "sweetalert2";
 import { DataContext } from "../Context/DataContext";
+import AddCustomerModal from "../modals/AddCustomerModal";
+import { GetCustomer } from "../../APIFunctions/GetCustomer";
 
 export const CustomerListResults = ({
   // customers,
@@ -49,10 +50,7 @@ export const CustomerListResults = ({
   const [displayedCustomers, setDisplayedCustomers] = useState([]);
   const [currCustomerID, setCurrCustomerID] = useState("");
   const [openAddNewCustomer, setOpenAddNewCustomer] = useState(false);
-  const [name, setName] = useState();
-  const [contact, setContact] = useState();
-  const [address, setAddress] = useState();
-  const [description, setDescription] = useState();
+
   const [isEdit, setIsEdit] = useState(false);
   const {customers} = useContext(DataContext);
 
@@ -120,40 +118,14 @@ export const CustomerListResults = ({
     // props.setCustomersValue(result);
   };
 
-  const handleClose = () => {
+  const CloseModal = () => {
     setOpenAddNewCustomer(false);
-    setName("");
-    setContact("");
-    setDescription("");
-    setAddress("");
+    setIsEdit(false);
   };
 
   //API Functions
 
-  const GetCustomer = async (id) => {
-    const res = await axios({
-      url: app_constants.API_URL + `api/Customers/GetCustomer?ID=${id}`,
-      method: "GET",
-      headers: {
-        Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
-      },
-    });
-    if (res.data.status == "Success") {
-      console.log(res.data);
-      setName(res.data.result.name);
-      setAddress(res.data.result.address);
-      setContact(res.data.result.phoneNo);
-      setDescription(res.data.result.description);
-      setOpenAddNewCustomer(true);
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Error occured while fetching details of the customer",
-        text: res.data.message,
-      });
-    }
-  };
-
+ 
   const DeleteCustomer = async (id) => {
     const res = await axios({
       url: app_constants.API_URL + `api/Customers/DeleteCustomer?ID=${id}`,
@@ -177,68 +149,7 @@ export const CustomerListResults = ({
     }
   };
 
-  const CreateCustomer = async () => {
-    var formdata = new FormData();
-    formdata.append("Name", name);
-    formdata.append("Contact", contact);
-    formdata.append("Address", address);
-    formdata.append("Description", description);
-
-    const res = await axios({
-      url: app_constants.API_URL + "api/Customers/AddCustomer",
-      method: "POST",
-      headers: {
-        Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
-        "content-type": "multipart/form-data",
-      },
-      data: formdata,
-    });
-    if (res.data.status == "Success") {
-      Swal.fire({
-        icon: "success",
-        title: "Customer added successfully",
-      });
-      refreshcustomers();
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Error Occured",
-        text: res.data.Message,
-      });
-    }
-
-    handleClose();
-  };
-
-  const EditCustomer = async (id) => {
-    var formdata = new FormData();
-    formdata.append("Name", name);
-    formdata.append("PhoneNo", contact);
-    formdata.append("Address", address);
-    formdata.append("Description", description);
-    const res = await axios({
-      url: app_constants.API_URL + `api/Customers/EditCustomer?ID=${id}`,
-      method: "POST",
-      headers: {
-        Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
-      },
-      data: formdata,
-    });
-    if (res.data.status == "Success") {
-      Swal.fire({
-        icon: "success",
-        title: "Customer details successfully updated",
-      });
-      refreshcustomers();
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Error occured while editing",
-        text: res.data.message,
-      });
-    }
-    handleClose();
-  };
+  
 
   return (
     <Card {...rest} >
@@ -272,10 +183,6 @@ export const CustomerListResults = ({
               variant="contained"
               onClick={() => {
                 setOpenAddNewCustomer(true);
-                setName("");
-                setAddress("");
-                setDescription("");
-                setContact("");
               }}
             >
               Add Customers
@@ -371,8 +278,8 @@ export const CustomerListResults = ({
                         color="primary"
                         onClick={() => {
                           setIsEdit(true);
-                          GetCustomer(customer.id);
-                          setCurrCustomerID(customer.id);
+                          setOpenAddNewCustomer(true);
+                          setCurrCustomerID(customer.customerId);
                         }}
                       >
                         <EditIcon />
@@ -418,108 +325,7 @@ export const CustomerListResults = ({
       />
 
       {/* Add new Customer Modal */}
-      <Modal open={openAddNewCustomer} onClose={handleClose}>
-        <Box className={styles.AddNewCustomerModalOuter}>
-          <div
-            style={{
-              height: "40px",
-              width: "100%",
-              marginLeft: "auto",
-              display: "flex",
-              justifyContent: "space-between",
-            }}
-          >
-            <Typography
-              id="confirm-document-deletion-title"
-              variant="h6"
-              component="h2"
-            >
-              {/* Create New Batch */}
-              {isEdit ? "Update Customer" : "Add new Customer"}
-            </Typography>
-            <Button
-              variant="contained"
-              color="error"
-              onClick={handleClose}
-              style={{ marginLeft: "auto" }}
-            >
-              <CloseIcon />
-            </Button>
-          </div>
-          <div>
-            <Typography
-              id="confirm-document-deletion-description"
-              sx={{ mt: 2 }}
-            >
-              <div>
-                <TextField
-                  id="newBatchName"
-                  label="Name"
-                  value={name}
-                  onChange={(event) => {
-                    setName(event.target.value);
-                  }}
-                  sx={{ marginTop: "25px", width: "100%" }}
-                />
-                <TextField
-                  id="newBatchNameAR"
-                  label="Contact No"
-                  value={contact}
-                  onChange={(event) => {
-                    setContact(event.target.value);
-                  }}
-                  sx={{ marginTop: "25px", width: "100%" }}
-                />
-                <TextField
-                  id="newBatchNameAR"
-                  label="Address"
-                  value={address}
-                  onChange={(event) => {
-                    setAddress(event.target.value);
-                  }}
-                  sx={{ marginTop: "25px", width: "100%" }}
-                />
-                <TextField
-                  id="newBatchNameAR"
-                  label="Description"
-                  value={description}
-                  onChange={(event) => {
-                    setDescription(event.target.value);
-                  }}
-                  sx={{ marginTop: "25px", width: "100%" }}
-                  multiline
-                  rows={4}
-                />
-              </div>
-            </Typography>
-            <div>
-              <div style={{ textAlign: "right", marginTop: "20px" }}>
-                <Button
-                  onClick={() => {
-                    if (isEdit) {
-                      EditCustomer(currCustomerID);
-                    } else {
-                      CreateCustomer();
-                    }
-                  }}
-                  color="primary"
-                  variant="contained"
-                >
-                  {isEdit ? "Update" : "Create"}
-                </Button>
-                <Button
-                  onClick={handleClose}
-                  sx={{ color: "#fff", marginLeft: "15px" }}
-                  color="error"
-                  variant="contained"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </div>
-        </Box>
-      </Modal>
+     <AddCustomerModal open={openAddNewCustomer} CloseModal={CloseModal} isEdit={isEdit} currCustomerID={currCustomerID}/>
     </Card>
   );
 };

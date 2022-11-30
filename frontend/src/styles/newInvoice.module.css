@@ -2,6 +2,12 @@
 
 }
 
+.CustomerContainer{
+    display: flex;
+    align-items: center;
+    width:33%;
+}
+
 .NewInvoice_TopContainer{
     display: flex;
     align-items: center;
