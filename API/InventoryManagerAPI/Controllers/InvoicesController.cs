@@ -162,7 +162,7 @@ namespace InventoryManagerAPI.Controllers
                     InvoiceDate = invoiceDTO.InvoiceDate,
                     Comments = invoiceDTO.Comments,
                     InvoiceNumber = invoiceDTO.InvoiceNumber,
-                    Customer = invoiceDTO.customer,
+                    CustomerId = invoiceDTO.customer.CustomerId,
                     Status = invoiceDTO.Status,
                     Profit = invoiceDTO.Profit,
                     TotalAmount = invoiceDTO.TotalAmount,

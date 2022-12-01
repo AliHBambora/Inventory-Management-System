@@ -45,7 +45,7 @@ export const CustomerListToolbar = (props) => {
           <Button startIcon={<DownloadIcon fontSize="small" />} sx={{ mr: 1 }}>
             Export
           </Button>
-          <Button endIcon={<AddIcon />} color="primary" variant="contained" onClick={() => {OpenAddNewCustomerModal(true)}}>
+          <Button endIcon={<AddIcon />} color="primary" variant="contained">
             Add Customers
           </Button>
         </Box>

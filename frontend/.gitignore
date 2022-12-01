@@ -4,12 +4,18 @@
 /node_modules
 /.pnp
 .pnp.js
+.eslintrc.json
 
 # testing
 /coverage
 
 # production
 /build
+[Bb]in/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
 
 # misc
 .DS_Store

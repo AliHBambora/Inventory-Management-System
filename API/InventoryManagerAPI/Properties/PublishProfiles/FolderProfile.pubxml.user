@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121.
+-->
+<Project>
+  <PropertyGroup>
+    <_PublishTargetUrl>C:\React Projects\Inventory Managment System\API\InventoryManagerAPI\bin\Release\net6.0\publish\</_PublishTargetUrl>
+    <History>True|2022-12-01T12:17:11.3085973Z;True|2022-12-01T15:15:36.4501539+03:00;True|2022-12-01T13:38:11.3101489+03:00;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+</Project>
