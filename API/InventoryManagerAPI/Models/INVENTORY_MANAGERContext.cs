@@ -93,13 +93,21 @@ namespace InventoryManagerAPI.Models
                     .ValueGeneratedNever()
                     .HasColumnName("ID");
 
+                entity.Property(e => e.CostPrice).HasColumnType("decimal(18, 4)");
+
                 entity.Property(e => e.Name).HasMaxLength(250);
+
+                entity.Property(e => e.Quantity).HasDefaultValueSql("((0))");
 
                 entity.Property(e => e.QuantityUnit)
                     .HasMaxLength(50)
                     .HasDefaultValueSql("((0))");
 
-                entity.Property(e => e.RetailPrice).HasDefaultValueSql("(CONVERT([bigint],(0)))");
+                entity.Property(e => e.RetailPrice)
+                    .HasColumnType("decimal(18, 4)")
+                    .HasDefaultValueSql("(CONVERT([bigint],(0)))");
+
+                entity.Property(e => e.WholeSalePrice).HasColumnType("decimal(18, 4)");
             });
 
             OnModelCreatingPartial(modelBuilder);

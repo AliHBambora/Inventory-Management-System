@@ -20,8 +20,9 @@ import Swal from "sweetalert2";
 import { DataContext } from "../Context/DataContext";
 import app_constants from "../../constants/constants";
 import { getAllProducts } from "../../APIFunctions/GetAllProducts";
+import AddIcon from '@mui/icons-material/Add';
 import dayjs from "dayjs";
-import { bool } from "yup";
+import AddProductModal from "../modals/AddProductModal";
 
 const Invoice = ({
   invoiceDate,
@@ -52,22 +53,23 @@ const Invoice = ({
   const [grandTotal, setGrandTotal] = useState(null);
   const [subTotal, setSubTotal] = useState(null);
   const [discount, setDiscount] = useState(0);
+  const [openAddNewProduct, setOpenAddNewProduct] = useState(false);
+
 
   const { products, setProducts } = useContext(DataContext);
 
   useEffect(() => {
-    const keyDownHandler = event => {
-      console.log('User pressed: ', event.key);
+    const keyDownHandler = (event) => {
+      console.log("User pressed: ", event.key);
 
-      if (event.key === '+') {
-       AddItem();
+      if (event.key === "+") {
+        AddItem();
       }
     };
-    document.addEventListener('keydown', keyDownHandler);
+    document.addEventListener("keydown", keyDownHandler);
     return () => {
-      document.removeEventListener('keydown', keyDownHandler);
+      document.removeEventListener("keydown", keyDownHandler);
     };
-
   }, [invoiceDetails]);
 
   useEffect(() => {
@@ -229,7 +231,7 @@ const Invoice = ({
           {invoiceDetails.map((item, index) => (
             <tr key={index}>
               <td>{index + 1}</td>
-              <td>
+              <td style={{display:"flex",border:"none"}}>
                 <Autocomplete
                   value={item}
                   freeSolo
@@ -258,6 +260,9 @@ const Invoice = ({
                   )}
                   // open={inputValue.length > 2}
                 />
+                <IconButton onClick={() =>setOpenAddNewProduct(true)}>
+                  <AddIcon fontSize="small" />
+                </IconButton>
               </td>
               <td>
                 <TextField
@@ -422,6 +427,9 @@ const Invoice = ({
         invoiceNumber={invoiceNumber}
         invoiceType={invoiceType}
       />
+
+      {/* Add new product Modal */}
+      <AddProductModal openAddNewProduct={openAddNewProduct} isEdit={false} handleClose={()=>setOpenAddNewProduct(false)} product={{}} />
     </div>
   );
 };

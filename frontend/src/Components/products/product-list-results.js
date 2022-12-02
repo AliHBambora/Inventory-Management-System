@@ -4,8 +4,6 @@ import PropTypes from "prop-types";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import CloseIcon from "@mui/icons-material/Close";
-import styles from "../../styles/customer-list-results.module.css";
 import { Upload as UploadIcon } from "../icons/upload";
 import { Download as DownloadIcon } from "../icons/download";
 import AddIcon from "@mui/icons-material/Add";
@@ -41,21 +39,19 @@ import axios from "axios";
 import app_constants from "../../constants/constants";
 import Swal from "sweetalert2";
 import { DataContext } from "../Context/DataContext";
+import AddProductModal from "../modals/AddProductModal";
 
 export const ProductsListResults = ({ refreshproducts, ...rest }) => {
   const [selectedProductIds, setSelectedProductIds] = useState([]);
   const [limit, setLimit] = useState(10);
   const [page, setPage] = useState(0);
   const [displayedProducts, setDisplayedProducts] = useState([]);
-  const [currProductID, setCurrProductID] = useState("");
+  const [currProduct, setCurrProduct] = useState({});
   const [openAddNewProduct, setOpenAddNewProduct] = useState(false);
-  const [name, setName] = useState();
-  const [quantity, setQuantity] = useState();
-  const [wholeSalePrice, setWholeSalePrice] = useState(0);
-  const [retailPrice, setRetailPrice] = useState(0);
-  const [description, setDescription] = useState();
-  const [unit, setUnit] = useState(1);
+  
   const [isEdit, setIsEdit] = useState(false);
+  
+
 
   const {products} = useContext(DataContext);
 
@@ -125,12 +121,15 @@ export const ProductsListResults = ({ refreshproducts, ...rest }) => {
 
   const handleClose = () => {
     setOpenAddNewProduct(false);
-    setName("");
-    setQuantity(null);
-    setDescription("");
-    setWholeSalePrice(null);
-    setRetailPrice(null);
-    setUnit(1);
+    // setName("");
+    // setQuantity(null);
+    // setDescription("");
+    // setWholeSalePrice(0);
+    // setRetailPrice(0);
+    // setUnit(1);
+    // setProductNameError(false);
+    // setProductWSPError(false);
+    // setProductRPError(false);
   };
 
   //API Functions
@@ -145,13 +144,8 @@ export const ProductsListResults = ({ refreshproducts, ...rest }) => {
     });
     if (res.data.status == "Success") {
       console.log(res.data);
-      setName(res.data.result.name);
-      setQuantity(res.data.result.quantity);
-      setWholeSalePrice(res.data.result.wholeSalePrice);
-      setRetailPrice(res.data.result.retailPrice);
-      setDescription(res.data.result.description);
-      setUnit(res.data.result.unit);
       setOpenAddNewProduct(true);
+      setCurrProduct(res.data.data);
     } else {
       Swal.fire({
         icon: "error",
@@ -184,94 +178,11 @@ export const ProductsListResults = ({ refreshproducts, ...rest }) => {
     }
   };
 
-  const CreateProduct = async () => {
-    const PostObject = {
-      Name: name,
-      Quantity: quantity,
-      quantityUnit: unit,
-      Description: description,
-      WholeSalePrice: parseFloat(wholeSalePrice),
-      RetailPrice:parseFloat(retailPrice),
-    };
-    var formdata = new FormData();
-    formdata.append("Product", JSON.stringify(PostObject));
+ 
 
-    const res = await axios({
-      url: app_constants.API_URL + "api/Products/AddProduct",
-      method: "POST",
-      headers: {
-        Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
-        "content-type": "multipart/form-data",
-        // "Content-type": "application/json"
-      },
-      data: formdata,
-    }).catch((error) => {
-      if (error.response) {
-        console.log(error.response.status);
-        console.log(error.response.data);
-      } else if (error.request) {
-        console.log(error.request.status);
-        console.log(error.request.data);
-        //do something else
-      } else if (error.message) {
-        console.log(error.message.status);
-        console.log(error.message.data);
-        //do something other than the other two
-      }
-    });
-    if (res.data.status == "Success") {
-      Swal.fire({
-        icon: "success",
-        title: "Product added successfully",
-      });
-      refreshproducts();
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Error Occured",
-        text: res.data.Message,
-      });
-    }
-    handleClose();
-  };
+  
 
-  const EditProduct = async (id) => {
-    const PostObject = {
-      Name: name,
-      Quantity: quantity,
-      quantityUnit: unit,
-      Description: description,
-      WholeSalePrice:parseFloat(wholeSalePrice),
-      RetailPrice: parseFloat(retailPrice),
-    };
-    // var formdata = new FormData();
-    // formdata.append("Name", name);
-    // formdata.append("PhoneNo", contact);
-    // formdata.append("Address", address);
-    // formdata.append("Description", description);
-    const res = await axios({
-      url: app_constants.API_URL + `api/Products/EditProduct?ID=${id}`,
-      method: "POST",
-      headers: {
-        Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
-      },
-      data: PostObject,
-    });
-    if (res.data.status == "Success") {
-      Swal.fire({
-        icon: "success",
-        title: "Products details successfully updated",
-      });
-      refreshproducts();
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Error occured while editing",
-        text: res.data.message,
-      });
-    }
-    handleClose();
-  };
+  
 
   return (
     <Card {...rest}>
@@ -305,12 +216,7 @@ export const ProductsListResults = ({ refreshproducts, ...rest }) => {
               variant="contained"
               onClick={() => {
                 setOpenAddNewProduct(true);
-                setName("");
-                setQuantity(null);
-                setDescription("");
-                setWholeSalePrice(null);
-                setRetailPrice(null);
-                setUnit(1);
+                
               }}
             >
               Add products
@@ -412,7 +318,6 @@ export const ProductsListResults = ({ refreshproducts, ...rest }) => {
                         onClick={() => {
                           setIsEdit(true);
                           GetProduct(product.id);
-                          setCurrProductID(product.id);
                         }}
                       >
                         <EditIcon />
@@ -458,146 +363,7 @@ export const ProductsListResults = ({ refreshproducts, ...rest }) => {
       />
 
       {/* Add new product Modal */}
-      <Modal open={openAddNewProduct} onClose={handleClose}>
-        <Box className={styles.AddNewCustomerModalOuter}>
-          <div
-            style={{
-              height: "40px",
-              width: "100%",
-              marginLeft: "auto",
-              display: "flex",
-              justifyContent: "space-between",
-            }}
-          >
-            <Typography
-              id="confirm-document-deletion-title"
-              variant="h6"
-              component="h2"
-            >
-              {isEdit ? "Update product" : "Add new product"}
-            </Typography>
-            <Button
-              variant="contained"
-              color="error"
-              onClick={handleClose}
-              style={{ marginLeft: "auto" }}
-            >
-              <CloseIcon />
-            </Button>
-          </div>
-          <div>
-            <Typography
-              id="confirm-document-deletion-description"
-              sx={{ mt: 2 }}
-            >
-              <div>
-                <TextField
-                  id="newBatchName"
-                  focused
-                  label="Name"
-                  value={name}
-                  required
-                  onChange={(event) => {
-                    setName(event.target.value);
-                  }}
-                  sx={{ marginTop: "25px", width: "100%" }}
-                />
-                <div
-                  style={{
-                    display: "flex",
-                    marginTop: "25px",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <TextField
-                    id="newBatchNameAR"
-                    focused
-                    label="Quantity"
-                    required
-                    value={quantity}
-                    onChange={(event) => {
-                      setQuantity(event.target.value);
-                    }}
-                    fullWidth
-                    sx={{ width: "60%" }}
-                  />
-                  <FormControl fullWidth sx={{ width: "30%" }}>
-                    <InputLabel id="demo-simple-select-label">Unit</InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      value={unit}
-                      label="Age"
-                      onChange={(e) => setUnit(e.target.value)}
-                    >
-                      <MenuItem value={0}>Pcs</MenuItem>
-                      <MenuItem value={1}>Doz</MenuItem>
-                    </Select>
-                  </FormControl>
-                </div>
-                <TextField
-                  focused
-                  id="newBatchNameAR"
-                  label="WholeSale Price"
-                  value={wholeSalePrice}
-                  onChange={(event) => {
-                    setWholeSalePrice(event.target.value);
-                  }}
-                  sx={{ marginTop: "25px", width: "100%" }}
-                />
-
-                <TextField
-                  focused
-                  label="Retail Price"
-                  value={retailPrice}
-                  onChange={(event) => {
-                    setRetailPrice(event.target.value);
-                  }}
-                  sx={{ marginTop: "25px", width: "100%" }}
-                />
-                <TextField
-                  focused
-                  id="newBatchNameAR"
-                  label="Description"
-                  value={description}
-                  onChange={(event) => {
-                    setDescription(event.target.value);
-                  }}
-                  sx={{ marginTop: "25px", width: "100%" }}
-                  multiline
-                  rows={4}
-                />
-              </div>
-            </Typography>
-            <div>
-              <div style={{ textAlign: "right", marginTop: "20px" }}>
-                <Button
-                  onClick={() => {
-                    if (isEdit) {
-                      EditProduct(currProductID);
-                    } else {
-                      CreateProduct();
-                    }
-                  }}
-                  color="primary"
-                  variant="contained"
-                >
-                  {isEdit ? "Update" : "Create"}
-                </Button>
-                <Button
-                  onClick={handleClose}
-                  sx={{ color: "#fff", marginLeft: "15px" }}
-                  color="error"
-                  variant="contained"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </div>
-        </Box>
-      </Modal>
+      <AddProductModal openAddNewProduct={openAddNewProduct} isEdit={isEdit} handleClose={handleClose} product={currProduct} />
     </Card>
   );
 };
