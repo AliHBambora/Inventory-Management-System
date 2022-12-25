@@ -53,7 +53,7 @@ const AddProductModal = ({
       setRetailPrice(0);
       setUnit(1);
     }
-  }, [isEdit]);
+  }, []);
 
   const validateProductEntries = () => {
     var result = true;

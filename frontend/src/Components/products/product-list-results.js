@@ -121,15 +121,6 @@ export const ProductsListResults = ({ refreshproducts, ...rest }) => {
 
   const handleClose = () => {
     setOpenAddNewProduct(false);
-    // setName("");
-    // setQuantity(null);
-    // setDescription("");
-    // setWholeSalePrice(0);
-    // setRetailPrice(0);
-    // setUnit(1);
-    // setProductNameError(false);
-    // setProductWSPError(false);
-    // setProductRPError(false);
   };
 
   //API Functions
@@ -177,12 +168,6 @@ export const ProductsListResults = ({ refreshproducts, ...rest }) => {
       });
     }
   };
-
- 
-
-  
-
-  
 
   return (
     <Card {...rest}>

@@ -135,6 +135,7 @@ export const NavItem = (props) => {
           onClick={() => {
             if (sessionStorage.getItem("Invoice")!=null) {
               sessionStorage.removeItem("Invoice");
+              sessionStorage.removeItem("InvoiceID");
             }
           }}
           sx={{

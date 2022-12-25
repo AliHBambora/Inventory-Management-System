@@ -18,4 +18,10 @@ namespace InventoryManagerAPI.DTO
 
         public List<ProductDTO> productList { get; set; }
     }
+
+    public enum InvoiceStatus
+    {
+        Cash,
+        Credit
+    }
 }

@@ -19,6 +19,7 @@ import axios from "axios";
 import app_constants from "../../constants/constants.js";
 import dayjs from "dayjs";
 import { Link, Outlet } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const InvoiceTable = ({data}) => {
   const Invoice = [
@@ -96,7 +97,30 @@ const InvoiceTable = ({data}) => {
     });
     if(res.data.status=="success"){
       sessionStorage.setItem("Invoice",JSON.stringify(res.data.data[0]));
+      sessionStorage.setItem("InvoiceID",ID);
       newInvoiceRef.current.click();
+    }
+  }
+
+  const DeleteInvoice = async (id)=>{
+    const res = await axios({
+      url:app_constants.API_URL+`api/Invoices/DeleteInvoice?ID=${id}`,
+      method:"POST",
+      headers: {
+        Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
+      }
+    });
+    if(res.data.status=="success"){
+     Swal.fire({
+      icon:"success",
+      text:"Invoice deleted successfully"
+     });
+    }
+    else{
+      Swal.fire({
+        icon:"error",
+        text:res.Message
+       });
     }
   }
 
@@ -158,7 +182,8 @@ const InvoiceTable = ({data}) => {
                   />
                 </TableCell>
 
-                <TableCell>
+                <TableCell style={{display:"flex"}}>
+                  
                   <Tooltip title="Edit">
                     <IconButton
                       color="primary"
@@ -170,20 +195,20 @@ const InvoiceTable = ({data}) => {
                   <Tooltip title="Delete">
                     <IconButton
                       color="error"
-                      //   onClick={() =>
-                      //     Swal.fire({
-                      //       icon: "question",
-                      //       title: "Are you sure you want to delete this customer?",
-                      //       showConfirmButton: true,
-                      //       confirmButtonText: "Yes",
-                      //       showCancelButton: true,
-                      //       cancelButtonText: "Cancel",
-                      //     }).then((res) => {
-                      //       if (res.isConfirmed) {
-                      //         DeleteCustomer(customer.id);
-                      //       }
-                      //     })
-                      //   }
+                        onClick={() =>
+                          Swal.fire({
+                            icon: "question",
+                            title: "Are you sure you want to delete this customer?",
+                            showConfirmButton: true,
+                            confirmButtonText: "Yes",
+                            showCancelButton: true,
+                            cancelButtonText: "Cancel",
+                          }).then((res) => {
+                            if (res.isConfirmed) {
+                              DeleteInvoice(invoice.invoiceId);
+                            }
+                          })
+                        }
                     >
                       <DeleteIcon />
                     </IconButton>

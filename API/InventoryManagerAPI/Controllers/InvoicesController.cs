@@ -57,6 +57,70 @@ namespace InventoryManagerAPI.Controllers
 
         }
 
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Invoice>>> GetAllPendingInvoices()
+        {
+            if (_context.Invoices == null)
+            {
+                return NotFound();
+            }
+            try
+            {
+                var result = from a in _context.Invoices
+                             join b in _context.Customers on a.CustomerId equals b.CustomerId
+                             where a.Status == InvoiceStatus.Credit.ToString()
+                             select new
+                             {
+                                 InvoiceId = a.InvoiceId,
+                                 InvoiceNumber = a.InvoiceNumber,
+                                 InvoiceDate = a.InvoiceDate,
+                                 TotalAmount = a.TotalAmount,
+                                 Status = a.Status,
+                                 CustomerName = b.Name,
+                                 AmountPaid = a.AmountPaid,
+                                 AmountDue = a.AmountDue
+                             };
+                return Ok(new { status = "Success", Result = result });
+            }
+            catch (Exception e)
+            {
+                return Ok(new { status = "failed", message = e.Message });
+            }
+
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Invoice>>> GetAllPaidInvoices()
+        {
+            if (_context.Invoices == null)
+            {
+                return NotFound();
+            }
+            try
+            {
+                var result = from a in _context.Invoices
+                             join b in _context.Customers on a.CustomerId equals b.CustomerId
+                             where a.Status == InvoiceStatus.Cash.ToString()
+                             select new
+                             {
+                                 InvoiceId = a.InvoiceId,
+                                 InvoiceNumber = a.InvoiceNumber,
+                                 InvoiceDate = a.InvoiceDate,
+                                 TotalAmount = a.TotalAmount,
+                                 Status = a.Status,
+                                 CustomerName = b.Name,
+                                 AmountPaid = a.AmountPaid,
+                                 AmountDue = a.AmountDue
+                             };
+                return Ok(new { status = "Success", Result = result });
+            }
+            catch (Exception e)
+            {
+                return Ok(new { status = "failed", message = e.Message });
+            }
+
+        }
+
         // GET: api/Invoices/5
         [HttpPost]
         public async Task<ActionResult<InvoiceDTO>> GetInvoice()
@@ -94,14 +158,14 @@ namespace InventoryManagerAPI.Controllers
                                  ProductQuantityUnit = ip.ProductQuantityUnit,
                                  ProductPrice = ip.ProductUnitPrice,
                                  ProductTotal = ip.ProductTotalPrice,
-                                 Customer= new Customer
+                                 Customer = new Customer
                                  {
                                      CustomerId = c.CustomerId,
                                      Address = c.Address,
                                      Description = c.Description,
                                      Email = c.Email,
                                      Name = c.Name,
-                                     PhoneNo= c.PhoneNo
+                                     PhoneNo = c.PhoneNo
                                  }
                              })
                             .GroupBy(x => new
@@ -196,70 +260,85 @@ namespace InventoryManagerAPI.Controllers
 
         }
 
-        // PUT: api/Invoices/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutInvoice(Guid id, Invoice invoice)
-        {
-            if (id != invoice.InvoiceId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(invoice).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!InvoiceExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Invoices
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Invoice>> PostInvoice(Invoice invoice)
+        public async Task<ActionResult<Product>> EditInvoice(Guid id,InvoiceDTO invoiceDTO)
         {
             if (_context.Invoices == null)
             {
-                return Problem("Entity set 'DataContext.Invoices'  is null.");
+                return Problem("Entity set 'DataContext.Products'  is null.");
             }
-            _context.Invoices.Add(invoice);
-            await _context.SaveChangesAsync();
+            try
+            {
+                //var id = new Guid(HttpContext.Request.Query["ID"]);
+                var inv = _context.Invoices.FirstOrDefault(x => x.InvoiceId == id);
 
-            return CreatedAtAction("GetInvoice", new { id = invoice.InvoiceId }, invoice);
+                inv.InvoiceDate = invoiceDTO.InvoiceDate;
+                inv.Comments = invoiceDTO.Comments;
+                inv.InvoiceNumber = invoiceDTO.InvoiceNumber;
+                inv.CustomerId = invoiceDTO.customer.CustomerId;
+                inv.Status = invoiceDTO.Status;
+                inv.Profit = invoiceDTO.Profit;
+                inv.TotalAmount = invoiceDTO.TotalAmount;
+                inv.Discount = invoiceDTO.Discount;
+                inv.AmountPaid = invoiceDTO.AmountPaid;
+                inv.AmountDue = invoiceDTO.TotalAmount - invoiceDTO.AmountPaid;
+
+                var invProducts = _context.InvoiceProducts.Where(x => x.InvoiceId == id).ToList();
+                foreach (var item in invProducts)
+                {
+                    _context.InvoiceProducts.Remove(item);
+                }
+
+                foreach (var item in invoiceDTO.productList)
+                {
+                    var invoiceProduct = new InvoiceProduct
+                    {
+                        Id = Guid.NewGuid(),
+                        InvoiceId = id,
+                        ProductId = item.id,
+                        ProductQuantity = item.qty,
+                        ProductQuantityUnit = item.unit.ToString(),
+                        ProductUnitPrice = item.price,
+                        ProductTotalPrice = item.total
+                    };
+                    _context.InvoiceProducts.Add(invoiceProduct);
+                }
+                await _context.SaveChangesAsync();
+                return Ok(new { status = "Success" });
+            }
+            catch (Exception e)
+            {
+                return Ok(new { status = "failed", Message = e.Message });
+            }
+
         }
 
         // DELETE: api/Invoices/5
-        [HttpDelete("{id}")]
+        [HttpPost]
         public async Task<IActionResult> DeleteInvoice(Guid id)
         {
             if (_context.Invoices == null)
             {
                 return NotFound();
             }
-            var invoice = await _context.Invoices.FindAsync(id);
-            if (invoice == null)
+            try
             {
-                return NotFound();
+                var invoice = await _context.Invoices.FindAsync(id);
+                if (invoice == null)
+                {
+                    return NotFound();
+                }
+
+                _context.Invoices.Remove(invoice);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { status = "success" });
             }
-
-            _context.Invoices.Remove(invoice);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch(Exception e)
+            {
+                return Ok(new { status = "failed", Message = e.Message });
+            }
+            
         }
 
         private bool InvoiceExists(Guid id)

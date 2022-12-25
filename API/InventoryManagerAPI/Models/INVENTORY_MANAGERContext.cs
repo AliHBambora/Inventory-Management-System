@@ -74,6 +74,10 @@ namespace InventoryManagerAPI.Models
 
                 entity.Property(e => e.ProductQuantityUnit).HasMaxLength(50);
 
+                entity.Property(e => e.ProductTotalPrice).HasColumnType("decimal(18, 3)");
+
+                entity.Property(e => e.ProductUnitPrice).HasColumnType("decimal(18, 3)");
+
                 entity.HasOne(d => d.Invoice)
                     .WithMany(p => p.InvoiceProducts)
                     .HasForeignKey(d => d.InvoiceId)

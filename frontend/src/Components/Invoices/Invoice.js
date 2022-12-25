@@ -20,7 +20,7 @@ import Swal from "sweetalert2";
 import { DataContext } from "../Context/DataContext";
 import app_constants from "../../constants/constants";
 import { getAllProducts } from "../../APIFunctions/GetAllProducts";
-import AddIcon from '@mui/icons-material/Add';
+import AddIcon from "@mui/icons-material/Add";
 import dayjs from "dayjs";
 import AddProductModal from "../modals/AddProductModal";
 
@@ -54,7 +54,6 @@ const Invoice = ({
   const [subTotal, setSubTotal] = useState(null);
   const [discount, setDiscount] = useState(0);
   const [openAddNewProduct, setOpenAddNewProduct] = useState(false);
-
 
   const { products, setProducts } = useContext(DataContext);
 
@@ -169,11 +168,18 @@ const Invoice = ({
             Comments: "",
             customer: customer,
             Profit: 0,
-            AmountPaid: amountPaid,
+            AmountPaid: invoiceType === "Cash" ? grandTotal : amountPaid,
             productList: invoiceDetails,
           };
+          const URL =
+            sessionStorage.getItem("Invoice") != null
+              ? `api/Invoices/EditInvoice?ID=${sessionStorage.getItem(
+                  "InvoiceID"
+                )}`
+              : "api/Invoices/AddInvoice";
+          console.log(POSTOBJ);
           const res = await axios({
-            url: app_constants.API_URL + "api/Invoices/AddInvoice",
+            url: app_constants.API_URL + URL,
             method: "POST",
             headers: {
               Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
@@ -182,11 +188,14 @@ const Invoice = ({
           });
           if (res.data.status == "Success") {
             Swal.fire({
-              icon: "error",
-              text: res.data.Message,
+              icon: "success",
+              text: "Invoice generated successfully",
               timer: 1000,
             });
-            setOpenInvoicePrintDialog(true);
+            if (sessionStorage.getItem("Invoice") == null) {
+              setOpenInvoicePrintDialog(true);
+            }
+            
           } else {
             Swal.fire({
               icon: "error",
@@ -231,7 +240,7 @@ const Invoice = ({
           {invoiceDetails.map((item, index) => (
             <tr key={index}>
               <td>{index + 1}</td>
-              <td style={{display:"flex",border:"none"}}>
+              <td style={{ display: "flex", border: "none" }}>
                 <Autocomplete
                   value={item}
                   freeSolo
@@ -260,7 +269,7 @@ const Invoice = ({
                   )}
                   // open={inputValue.length > 2}
                 />
-                <IconButton onClick={() =>setOpenAddNewProduct(true)}>
+                <IconButton onClick={() => setOpenAddNewProduct(true)}>
                   <AddIcon fontSize="small" />
                 </IconButton>
               </td>
@@ -429,7 +438,12 @@ const Invoice = ({
       />
 
       {/* Add new product Modal */}
-      <AddProductModal openAddNewProduct={openAddNewProduct} isEdit={false} handleClose={()=>setOpenAddNewProduct(false)} product={{}} />
+      <AddProductModal
+        openAddNewProduct={openAddNewProduct}
+        isEdit={false}
+        handleClose={() => setOpenAddNewProduct(false)}
+        product={{}}
+      />
     </div>
   );
 };

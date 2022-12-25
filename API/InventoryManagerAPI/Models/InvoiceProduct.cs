@@ -10,8 +10,8 @@ namespace InventoryManagerAPI.Models
         public Guid InvoiceId { get; set; }
         public int ProductQuantity { get; set; }
         public string ProductQuantityUnit { get; set; } = null!;
-        public long ProductUnitPrice { get; set; }
-        public long ProductTotalPrice { get; set; }
+        public decimal ProductUnitPrice { get; set; }
+        public decimal ProductTotalPrice { get; set; }
 
         public virtual Invoice Invoice { get; set; } = null!;
         public virtual Product Product { get; set; } = null!;

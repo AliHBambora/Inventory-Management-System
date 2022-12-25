@@ -2,9 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import PerfectScrollbar from "react-perfect-scrollbar";
 import AddIcon from "@mui/icons-material/Add";
 import { Search as SearchIcon } from "../icons/search";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
@@ -20,19 +18,35 @@ import {
   Typography,
 } from "@mui/material";
 import InvoiceTable from "./InvoiceTable";
-import {Outlet,Link} from "react-router-dom";
+import { Outlet, Link } from "react-router-dom";
 import { DataContext } from "../Context/DataContext";
-
+import InvoiceFilterCard from "./InvoiceFilterCard";
+import { APIFunction } from "../../APIFunctions/GetAllCustomers";
 
 const InvoicesListResults = ({ ...rest }) => {
-  const [issuedFromDate, setIssuedFromDate] = useState();
-  const [issuedToDate, setIssuedToDate] = useState();
   const [tabvalue, setTabValue] = useState("1");
-  const {invoices} = useContext(DataContext);
+  const [displayedInvoices, setDisplayedInvoices] = useState([]);
+  const { invoices } = useContext(DataContext);
   const newInvoiceRef = useRef(null);
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
+    switch (newValue) {
+      case "1":
+        setDisplayedInvoices(invoices);
+        break;
+      case "2":
+        setDisplayedInvoices(invoices.filter((inv) => inv.status === "Credit"));
+        break;
+      case "3":
+        setDisplayedInvoices(invoices.filter((inv) => inv.status === "Cash"));
+        break;
+    }
   };
+
+  useEffect(() => {
+    console.log("useEffect");
+    setDisplayedInvoices(invoices);
+  }, [invoices]);
 
   return (
     <Card {...rest} sx={{ backgroundColor: "#f9fafc" }}>
@@ -56,6 +70,7 @@ const InvoicesListResults = ({ ...rest }) => {
               variant="contained"
               onClick={() => {
                 sessionStorage.removeItem("Invoice");
+                sessionStorage.removeItem("InvoiceID");
                 newInvoiceRef.current.click();
               }}
             >
@@ -64,61 +79,8 @@ const InvoicesListResults = ({ ...rest }) => {
           </Box>
         </Box>
         <Box sx={{ marginTop: "30px", marginBottom: "30px" }}>
-          <Card>
-            <CardContent
-              style={{ padding: "25px", backgroundColor: "#ffffff" }}
-            >
-              <Box sx={{ display: "flex", width: "100%" }}>
-                <Box
-                  sx={{
-                    width: "80%",
-                    display: "flex",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <TextField
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <SvgIcon color="action" fontSize="small">
-                            <SearchIcon />
-                          </SvgIcon>
-                        </InputAdornment>
-                      ),
-                    }}
-                    placeholder="Invoice Name"
-                    variant="outlined"
-                    //   onChange={handleSearchChange}
-                  />
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DateTimePicker
-                      label="Issued From"
-                      value={issuedFromDate}
-                      onChange={(newValue) => setIssuedFromDate(newValue)}
-                      renderInput={(params) => <TextField {...params} />}
-                    />
-                    <DateTimePicker
-                      label="Issued To"
-                      value={issuedToDate}
-                      onChange={(newValue) => setIssuedToDate(newValue)}
-                      renderInput={(params) => <TextField {...params} />}
-                    />
-                  </LocalizationProvider>
-                </Box>
-                <Box sx={{ display: "flex", width: "20%" }}>
-                  <Button
-                    size="medium"
-                    color="primary"
-                    variant="contained"
-                    sx={{ width: "60%", height: "80%", marginLeft: "auto" }}
-                  >
-                    Search
-                  </Button>
-                </Box>
-              </Box>
-            </CardContent>
-          </Card>
           <Box sx={{ marginTop: "20px" }}>
+            <InvoiceFilterCard />
             <Card>
               <CardContent style={{ backgroundColor: "#f9fafc" }}>
                 {/* Tab structure for type of invoices ie. Pending,Paid */}
@@ -137,10 +99,14 @@ const InvoicesListResults = ({ ...rest }) => {
                       </TabList>
                     </Box>
                     <TabPanel value="1">
-                      <InvoiceTable data={invoices} />
+                      <InvoiceTable data={displayedInvoices} />
                     </TabPanel>
-                    <TabPanel value="2">Item Two</TabPanel>
-                    <TabPanel value="3">Item Three</TabPanel>
+                    <TabPanel value="2">
+                      <InvoiceTable data={displayedInvoices} />
+                    </TabPanel>
+                    <TabPanel value="3">
+                      <InvoiceTable data={displayedInvoices} />
+                    </TabPanel>
                   </TabContext>
                 </Box>
               </CardContent>
@@ -148,7 +114,7 @@ const InvoicesListResults = ({ ...rest }) => {
           </Box>
         </Box>
       </PerfectScrollbar>
-      <Link to="/createInvoice" ref={newInvoiceRef}/>
+      <Link to="/createInvoice" ref={newInvoiceRef} />
       <Outlet />
     </Card>
   );
