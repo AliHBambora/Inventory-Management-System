@@ -57,7 +57,7 @@ namespace InventoryManagerAPI.Controllers
                 {
                     return Ok(new { status = "failed", Message = "Product not found" });
                 }
-                return Ok(new { status = "Success", result = product });
+                return Ok(new { status = "success", result = product });
             }
             catch (Exception e)
             {
@@ -84,7 +84,7 @@ namespace InventoryManagerAPI.Controllers
                     Existingproduct.QuantityUnit = product.QuantityUnit;
                 }
                 await _context.SaveChangesAsync();
-                return Ok(new { status = "Success" });
+                return Ok(new { status = "success" });
             }
             catch (Exception e)
             {
@@ -124,7 +124,7 @@ namespace InventoryManagerAPI.Controllers
                 };
                 _context.Products.Add(newproduct);
                 await _context.SaveChangesAsync();
-                return Ok(new { status = "Success" });
+                return Ok(new { status = "success" });
             }
             catch (Exception e)
             {
@@ -147,7 +147,7 @@ namespace InventoryManagerAPI.Controllers
                 }
                 _context.Products.Remove(product);
                 await _context.SaveChangesAsync();
-                return Ok(new { status = "Success" });
+                return Ok(new { status = "success" });
             }
             catch (Exception e)
             {

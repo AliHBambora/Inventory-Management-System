@@ -1,4 +1,5 @@
 ﻿using InventoryManagerAPI;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +18,7 @@ namespace InventoryManagerAPI.Controllers.Authentication
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public IActionResult Login()
         {
             var username = Request.Form["username"];
@@ -26,7 +28,7 @@ namespace InventoryManagerAPI.Controllers.Authentication
             {
                 return Unauthorized(result[1]);
             }
-            return Ok(new { status = "success", token = result[1] });
+            return Ok(new { status = "success", result = result[1] });
         }
     }
 }

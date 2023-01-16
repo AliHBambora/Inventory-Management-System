@@ -251,7 +251,7 @@ namespace InventoryManagerAPI.Controllers
                     _context.InvoiceProducts.Add(invoiceProduct);
                 }
                 await _context.SaveChangesAsync();
-                return Ok(new { status = "Success" });
+                return Ok(new { status = "success" });
             }
             catch (Exception e)
             {
@@ -304,7 +304,7 @@ namespace InventoryManagerAPI.Controllers
                     _context.InvoiceProducts.Add(invoiceProduct);
                 }
                 await _context.SaveChangesAsync();
-                return Ok(new { status = "Success" });
+                return Ok(new { status = "success" });
             }
             catch (Exception e)
             {

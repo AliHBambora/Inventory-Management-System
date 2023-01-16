@@ -79,7 +79,7 @@ namespace InventoryManagerAPI.Controllers
                     customer.PhoneNo = fc["PhoneNo"];
                 }
                 await _context.SaveChangesAsync();
-                return Ok(new { status = "Success" });
+                return Ok(new { status = "success" });
             }
             catch (Exception e)
             {
@@ -115,7 +115,7 @@ namespace InventoryManagerAPI.Controllers
                 };
                 _context.Customers.Add(customer);
                 await _context.SaveChangesAsync();
-                return Ok(new { status = "Success" });
+                return Ok(new { status = "success" });
             }
             catch (Exception e)
             {
@@ -138,7 +138,7 @@ namespace InventoryManagerAPI.Controllers
                 }
                 _context.Customers.Remove(customer);
                 await _context.SaveChangesAsync();
-                return Ok(new { status = "Success" });
+                return Ok(new { status = "success" });
             }
             catch (Exception e)
             {
