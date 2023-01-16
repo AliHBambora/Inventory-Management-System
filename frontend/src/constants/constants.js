@@ -5,6 +5,8 @@ const app_constants = {
     GET:"GET",
     POST:"POST",
     SUCCESS:"success",
-    FAILED:"failed"
+    FAILED:"failed",
+    TOKEN:"token",
+    BEARER:"Bearer "
 }
 export default app_constants

@@ -11,10 +11,12 @@ import styles from "../../styles/customer-list-results.module.css";
 import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import Swal from "sweetalert2";
-import { GetCustomer } from "../../APIFunctions/GetCustomer";
+import { GetCustomer } from "../../API/GetCustomer";
 import app_constants from "../../constants/constants";
 import { DataContext } from "../Context/DataContext";
-import { getAllCustomers } from "../../APIFunctions/GetAllCustomers";
+import { getAllCustomers } from "../../API/GetAllCustomers";
+import { APIRequest } from "../../API/APIRequest";
+import endpoints from "../../API/endpoints";
 
 const AddCustomerModal = ({ open, CloseModal, isEdit,currCustomerID }) => {
   const [name, setName] = useState("");
@@ -60,30 +62,22 @@ const AddCustomerModal = ({ open, CloseModal, isEdit,currCustomerID }) => {
     formdata.append("Contact", contact);
     formdata.append("Address", address);
     formdata.append("Description", description);
-
-    const res = await axios({
-      url: app_constants.API_URL + "api/Customers/AddCustomer",
-      method: "POST",
-      headers: {
-        Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
-        "content-type": "multipart/form-data",
-      },
-      data: formdata,
-    });
-    if (res.data.status === "Success") {
-      Swal.fire({
-        icon: "success",
-        title: "Customer added successfully",
-      });
-      refreshcustomers();
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Error Occured",
-        text: res.data.Message,
-      });
-    }
-    CloseModal();
+    APIRequest.post(endpoints.ADDCUSTOMER,formdata).then((res)=>{
+      if (res.status === app_constants.SUCCESS) {
+        Swal.fire({
+          icon: "success",
+          title: "Customer added successfully",
+        });
+        refreshcustomers();
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error Occured",
+          text: res.data.Message,
+        });
+      }
+      CloseModal();
+    }).catch((err)=>alert(err));
   };
 
   const EditCustomer = async (id) => {
@@ -92,29 +86,24 @@ const AddCustomerModal = ({ open, CloseModal, isEdit,currCustomerID }) => {
     formdata.append("PhoneNo", contact);
     formdata.append("Address", address);
     formdata.append("Description", description);
-    const res = await axios({
-      url: app_constants.API_URL + `api/Customers/EditCustomer?ID=${id}`,
-      method: "POST",
-      headers: {
-        Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
-      },
-      data: formdata,
-    });
-    if (res.data.status === "Success") {
-      Swal.fire({
-        icon: "success",
-        title: "Customer details successfully updated",
-      });
-      refreshcustomers();
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Error occured while editing",
-        text: res.data.message,
-      });
-    }
-    CloseModal();
+    APIRequest.post(endpoints.EDITCUSTOMER+`ID=${id}`,formdata).then((res)=>{
+      if (res.status === app_constants.SUCCESS) {
+        Swal.fire({
+          icon: "success",
+          title: "Customer details successfully updated",
+        });
+        refreshcustomers();
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error occured while editing",
+          text: res.data.message,
+        });
+      }
+      CloseModal();
+    }); 
   };
+
   return (
     <Modal open={open} handleClose={() => CloseModal()}>
       <Box className={styles.AddNewCustomerModalOuter}>

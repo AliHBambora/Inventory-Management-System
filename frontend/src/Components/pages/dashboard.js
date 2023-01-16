@@ -1,18 +1,19 @@
 import { Box, Container, Grid } from '@mui/material';
 import { useContext, useEffect } from 'react';
-import {getAllCustomers} from '../../APIFunctions/GetAllCustomers';
-import {getAllInvoices} from '../../APIFunctions/GetAllInvoices';
-import {getAllProducts} from '../../APIFunctions/GetAllProducts';
+import {getAllCustomers} from '../../API/GetAllCustomers';
+import {getAllInvoices} from '../../API/GetAllInvoices';
+import {getAllProducts} from '../../API/GetAllProducts';
 import { DataContext } from '../Context/DataContext';
+import { Budget } from '../dashboard/budget';
+import {Sales} from '../dashboard/sales';
 // import { Budget } from '../components/dashboard/budget';
-// import { LatestOrders } from '../components/dashboard/latest-orders';
-// import { LatestProducts } from '../components/dashboard/latest-products';
-// import { Sales } from '../components/dashboard/sales';
-// import { TasksProgress } from '../components/dashboard/tasks-progress';
-// import { TotalCustomers } from '../components/dashboard/total-customers';
-// import { TotalProfit } from '../components/dashboard/total-profit';
-// import { TrafficByDevice } from '../components/dashboard/traffic-by-device';
-// import { DashboardLayout } from '../components/dashboard-layout';
+import { LatestOrders } from '../dashboard/latest-orders';
+import { LatestProducts } from '../dashboard/latest-products';
+import { TasksProgress } from '../dashboard/tasks-progress';
+import { TotalCustomers } from '../dashboard/total-customers';
+import { TotalProfit } from '../dashboard/total-profit';
+import { TrafficByDevice } from '../dashboard/traffic-by-device';
+import { DashboardLayout } from '../dashboard-layout';
 
 const Dashboard = () => {
 
@@ -82,11 +83,6 @@ const Dashboard = () => {
 
   return(
   <>
-    {/* <Head>
-      <title>
-        Dashboard | Material Kit
-      </title>
-    </Head>
     <Box
       component="main"
       sx={{
@@ -173,14 +169,14 @@ const Dashboard = () => {
           </Grid>
         </Grid>
       </Container>
-    </Box> */}
+    </Box>
   </>
 )};
 
-// Dashboard.getLayout = (page) => (
-//   <DashboardLayout>
-//     {page}
-//   </DashboardLayout>
-// );
+Dashboard.getLayout = (page) => (
+  <DashboardLayout>
+    {page}
+  </DashboardLayout>
+);
 
 export default Dashboard;

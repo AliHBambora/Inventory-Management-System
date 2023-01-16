@@ -31,7 +31,7 @@ import TreeItem from "@mui/lab/TreeItem";
 
 const items = [
   {
-    href: "/",
+    href: "/dashboard",
     icon: <ChartBarIcon fontSize="small" />,
     title: "Dashboard",
   },

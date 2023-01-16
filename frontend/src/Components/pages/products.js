@@ -6,7 +6,7 @@ import { ProductsListResults } from "../products/product-list-results.js";
 import app_constants from "../../constants/constants";
 import Swal from "sweetalert2";
 import { useContext, useEffect, useState } from "react";
-import { getAllProducts } from "../../APIFunctions/GetAllProducts.js";
+import { getAllProducts } from "../../API/GetAllProducts.js";
 import { DataContext } from "../Context/DataContext.js";
 
 const Products = () => {

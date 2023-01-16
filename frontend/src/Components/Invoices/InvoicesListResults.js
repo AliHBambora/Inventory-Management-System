@@ -21,7 +21,7 @@ import InvoiceTable from "./InvoiceTable";
 import { Outlet, Link } from "react-router-dom";
 import { DataContext } from "../Context/DataContext";
 import InvoiceFilterCard from "./InvoiceFilterCard";
-import { APIFunction } from "../../APIFunctions/GetAllCustomers";
+import { APIFunction } from "../../API/GetAllCustomers";
 
 const InvoicesListResults = ({ ...rest }) => {
   const [tabvalue, setTabValue] = useState("1");

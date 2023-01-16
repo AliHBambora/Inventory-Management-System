@@ -17,6 +17,8 @@ import app_constants from "../constants/constants";
 import Swal from "sweetalert2";
 import {Outlet,Link} from "react-router-dom";
 import axios from "axios";
+import { APIRequest } from "../API/APIRequest";
+import endpoints from "../API/endpoints";
 
 const Login = ({setValueOfisLocalStorageEmpty}) => {
   //const router = useRouter();
@@ -46,34 +48,25 @@ const Login = ({setValueOfisLocalStorageEmpty}) => {
     var formData = new FormData();
     formData.append("username",formik.values.username);
     formData.append("password",formik.values.password);
-
-    axios({
-        url: app_constants.API_URL+"Login",
-        method: "POST",
-        data: formData,
-        // headers: {
-        //   "content-type": "multipart/form-data",
-        // },
-      }).then((res) => {
-        console.log(res);
-        if (res.data.status === "success"){
-            //Login
-          localStorage.setItem("token",res.data.token);
-          setValueOfisLocalStorageEmpty(false);  
-          loginRef.current.click();
-        }
-        else{
-          //show invalid error
-          Swal.fire({
-            icon:"error",
-            title:"Unauthorized",
-            text:"Invalid username or password"
-          })
-        }
-      }).catch((err) => {
-        alert(err);
-        
-      }); // Catch errors
+    APIRequest.post(endpoints.LOGIN,formData).then((res) => {
+      console.log(res);
+      if (res.status === app_constants.SUCCESS){
+          //Login
+        sessionStorage.setItem("token",res.data);
+        setValueOfisLocalStorageEmpty(false);  
+        loginRef.current.click();
+      }
+      else{
+        //show invalid error
+        Swal.fire({
+          icon:"error",
+          title:"Unauthorized",
+          text:"Invalid username or password"
+        })
+      }
+    }).catch((err) => {
+      alert(err);
+    }); // Catch errors
   }
 
   return (
@@ -218,7 +211,7 @@ const Login = ({setValueOfisLocalStorageEmpty}) => {
             </form>
           </Container>
         </Box>
-        <Link to="/customers" ref={loginRef}/>
+        <Link to="/dashboard" ref={loginRef}/>
         <Outlet />
       </div>
     </>

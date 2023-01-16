@@ -15,9 +15,10 @@ import React, { useContext, useEffect, useState } from "react";
 import styles from "../../styles/customer-list-results.module.css";
 import app_constants from "../../constants/constants";
 import Swal from "sweetalert2";
-import { getAllProducts } from "../../APIFunctions/GetAllProducts";
+import { getAllProducts } from "../../API/GetAllProducts";
 import { DataContext } from "../Context/DataContext";
-
+import { APIRequest } from "../../API/APIRequest";
+import endpoints from "../../API/endpoints";
 
 const AddProductModal = ({
   openAddNewProduct,
@@ -35,7 +36,7 @@ const AddProductModal = ({
   const [description, setDescription] = useState();
   const [unit, setUnit] = useState(1);
 
-  const {products,setProducts} = useContext(DataContext);
+  const { products, setProducts } = useContext(DataContext);
 
   useEffect(() => {
     if (isEdit) {
@@ -72,13 +73,13 @@ const AddProductModal = ({
     return result;
   };
 
-  const refreshproducts = ()=>{
-    getAllProducts().then((res)=>{
-        if(res.status=="success"){
-          setProducts(res.data);
-        }
-      });
-  }
+  const refreshproducts = () => {
+    getAllProducts().then((res) => {
+      if (res.status == "success") {
+        setProducts(res.data);
+      }
+    });
+  };
 
   const CreateProduct = async () => {
     if (!validateProductEntries()) {
@@ -94,44 +95,24 @@ const AddProductModal = ({
     };
     var formdata = new FormData();
     formdata.append("Product", JSON.stringify(PostObject));
-
-    const res = await axios({
-      url: app_constants.API_URL + "api/Products/AddProduct",
-      method: "POST",
-      headers: {
-        Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
-        "content-type": "multipart/form-data",
-        // "Content-type": "application/json"
-      },
-      data: formdata,
-    }).catch((error) => {
-      if (error.response) {
-        console.log(error.response.status);
-        console.log(error.response.data);
-      } else if (error.request) {
-        console.log(error.request.status);
-        console.log(error.request.data);
-        //do something else
-      } else if (error.message) {
-        console.log(error.message.status);
-        console.log(error.message.data);
-        //do something other than the other two
-      }
-    });
-    if (res.data.status == "Success") {
-      Swal.fire({
-        icon: "success",
-        title: "Product added successfully",
-      });
-      refreshproducts();
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Error Occured",
-        text: res.data.Message,
-      });
-    }
-    handleClose();
+    APIRequest.post(endpoints.ADDPRODUCT, formdata)
+      .then((res) => {
+        if (res.status === app_constants.SUCCESS) {
+          Swal.fire({
+            icon: "success",
+            title: "Product added successfully",
+          });
+          refreshproducts();
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Error Occured",
+            text: res.data.Message,
+          });
+        }
+        handleClose();
+      })
+      .catch((err) => alert(err));
   };
 
   const EditProduct = async (id) => {
@@ -143,33 +124,22 @@ const AddProductModal = ({
       WholeSalePrice: parseFloat(wholeSalePrice),
       RetailPrice: parseFloat(retailPrice),
     };
-    // var formdata = new FormData();
-    // formdata.append("Name", name);
-    // formdata.append("PhoneNo", contact);
-    // formdata.append("Address", address);
-    // formdata.append("Description", description);
-    const res = await axios({
-      url: app_constants.API_URL + `api/Products/EditProduct?ID=${id}`,
-      method: "POST",
-      headers: {
-        Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
-      },
-      data: PostObject,
-    });
-    if (res.data.status == "Success") {
-      Swal.fire({
-        icon: "success",
-        title: "Products details successfully updated",
-      });
-      refreshproducts();
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Error occured while editing",
-        text: res.data.message,
-      });
-    }
-    handleClose();
+    APIRequest.post(endpoints.EDITPRODUCT+`?ID=${id}`,PostObject).then((res)=>{
+      if (res.status ===app_constants.SUCCESS) {
+        Swal.fire({
+          icon: "success",
+          title: "Products details successfully updated",
+        });
+        refreshproducts();
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error occured while editing",
+          text: res.data.message,
+        });
+      }
+      handleClose();
+    })
   };
   return (
     <Modal open={openAddNewProduct} onClose={() => handleClose()}>
@@ -307,7 +277,7 @@ const AddProductModal = ({
                 {isEdit ? "Update" : "Create"}
               </Button>
               <Button
-                onClick={()=>handleClose()}
+                onClick={() => handleClose()}
                 sx={{ color: "#fff", marginLeft: "15px" }}
                 color="error"
                 variant="contained"

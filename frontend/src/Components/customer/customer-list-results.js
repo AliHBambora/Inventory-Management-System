@@ -37,11 +37,13 @@ import app_constants from "../../constants/constants";
 import Swal from "sweetalert2";
 import { DataContext } from "../Context/DataContext";
 import AddCustomerModal from "../modals/AddCustomerModal";
-import { GetCustomer } from "../../APIFunctions/GetCustomer";
+import { GetCustomer } from "../../API/GetCustomer";
+import { APIRequest } from "../../API/APIRequest";
+import endpoints from "../../API/endpoints";
 
 export const CustomerListResults = ({
   // customers,
-  refreshcustomers,
+  //refreshcustomers,
   ...rest
 }) => {
   const [selectedCustomerIds, setSelectedCustomerIds] = useState([]);
@@ -52,7 +54,7 @@ export const CustomerListResults = ({
   const [openAddNewCustomer, setOpenAddNewCustomer] = useState(false);
 
   const [isEdit, setIsEdit] = useState(false);
-  const {customers} = useContext(DataContext);
+  const { customers } = useContext(DataContext);
 
   useEffect(() => {
     setDisplayedCustomers(customers);
@@ -125,34 +127,28 @@ export const CustomerListResults = ({
 
   //API Functions
 
- 
   const DeleteCustomer = async (id) => {
-    const res = await axios({
-      url: app_constants.API_URL + `api/Customers/DeleteCustomer?ID=${id}`,
-      method: "POST",
-      headers: {
-        Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
-      },
-    });
-    if (res.data.status == "Success") {
-      Swal.fire({
-        icon: "success",
-        title: "Customer successfully deleted",
-      });
-      refreshcustomers();
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Error occured while deleting customer",
-        text: res.data.message,
-      });
-    }
+    APIRequest.post(endpoints.DELETECUSTOMER + `?ID=${id}`, "")
+      .then((res) => {
+        if (res.status == app_constants.SUCCESS) {
+          Swal.fire({
+            icon: "success",
+            title: "Customer successfully deleted",
+          });
+          refreshcustomers();
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Error occured while deleting customer",
+            text: res.data.message,
+          });
+        }
+      })
+      .catch((err) => alert(err));
   };
 
-  
-
   return (
-    <Card {...rest} >
+    <Card {...rest}>
       <PerfectScrollbar>
         <Box
           sx={{
@@ -189,7 +185,7 @@ export const CustomerListResults = ({
             </Button>
           </Box>
         </Box>
-        <Box sx={{ marginTop:"30px",marginBottom:"30px" }}>
+        <Box sx={{ marginTop: "30px", marginBottom: "30px" }}>
           <Card>
             <CardContent style={{ padding: "15px", borderRadius: "10px" }}>
               <Box sx={{ maxWidth: 500 }}>
@@ -325,7 +321,12 @@ export const CustomerListResults = ({
       />
 
       {/* Add new Customer Modal */}
-     <AddCustomerModal open={openAddNewCustomer} CloseModal={CloseModal} isEdit={isEdit} currCustomerID={currCustomerID}/>
+      <AddCustomerModal
+        open={openAddNewCustomer}
+        CloseModal={CloseModal}
+        isEdit={isEdit}
+        currCustomerID={currCustomerID}
+      />
     </Card>
   );
 };

@@ -20,8 +20,10 @@ import app_constants from "../../constants/constants.js";
 import dayjs from "dayjs";
 import { Link, Outlet } from "react-router-dom";
 import Swal from "sweetalert2";
+import { APIRequest } from "../../API/APIRequest.js";
+import endpoints from "../../API/endpoints.js";
 
-const InvoiceTable = ({data}) => {
+const InvoiceTable = ({ data }) => {
   const Invoice = [
     {
       id: "1",
@@ -84,52 +86,45 @@ const InvoiceTable = ({data}) => {
 
   //API functions
 
-  const getInvoice =async (ID)=>{
+  const getInvoice = async (ID) => {
     var formdata = new FormData();
-    formdata.append("ID",ID);
-    const res = await axios({
-      url:app_constants.API_URL+"api/Invoices/GetInvoice",
-      method:"POST",
-      headers: {
-        Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
-      },
-      data:formdata
-    });
-    if(res.data.status=="success"){
-      sessionStorage.setItem("Invoice",JSON.stringify(res.data.data[0]));
-      sessionStorage.setItem("InvoiceID",ID);
-      newInvoiceRef.current.click();
-    }
-  }
-
-  const DeleteInvoice = async (id)=>{
-    const res = await axios({
-      url:app_constants.API_URL+`api/Invoices/DeleteInvoice?ID=${id}`,
-      method:"POST",
-      headers: {
-        Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
+    formdata.append("ID", ID);
+    APIRequest.post(endpoints.GETINVOICE, formdata).then((res) => {
+      if (res.status == "success") {
+        sessionStorage.setItem("Invoice", JSON.stringify(res.data.data[0]));
+        sessionStorage.setItem("InvoiceID", ID);
+        newInvoiceRef.current.click();
+      } else {
+        Swal.fire({
+          icon: "error",
+          text: "res.data.Message",
+        });
       }
     });
-    if(res.data.status=="success"){
-     Swal.fire({
-      icon:"success",
-      text:"Invoice deleted successfully"
-     });
-    }
-    else{
-      Swal.fire({
-        icon:"error",
-        text:res.Message
-       });
-    }
-  }
+  };
+
+  const DeleteInvoice = async (id) => {
+    APIRequest.post(endpoints.DELETEINVOICE + `?ID=${id}`, "").then((res) => {
+      if (res.status == "success") {
+        Swal.fire({
+          icon: "success",
+          text: "Invoice deleted successfully",
+        });
+      } else {
+        Swal.fire({
+          icon: "error",
+          text: res.Message,
+        });
+      }
+    });
+  };
 
   return (
     <>
       <PerfectScrollbar>
         <Table>
           <TableHead>
-            <TableRow style={{fontSize:"18px",fontWeight:600}}>
+            <TableRow style={{ fontSize: "18px", fontWeight: 600 }}>
               <TableCell padding="checkbox">
                 <Checkbox
                   checked={selectedInvoiceIds.length === data.length}
@@ -168,9 +163,11 @@ const InvoiceTable = ({data}) => {
                     value="true"
                   />
                 </TableCell>
-                <TableCell >{invoice.invoiceNumber}</TableCell>
+                <TableCell>{invoice.invoiceNumber}</TableCell>
                 <TableCell>{invoice.customerName}</TableCell>
-                <TableCell>{dayjs(invoice.invoiceDate).format('DD/MM/YYYY hh:mm A')}</TableCell>
+                <TableCell>
+                  {dayjs(invoice.invoiceDate).format("DD/MM/YYYY hh:mm A")}
+                </TableCell>
                 <TableCell>{invoice.totalAmount}</TableCell>
                 <TableCell>{invoice.amountPaid}</TableCell>
                 <TableCell>{invoice.amountDue}</TableCell>
@@ -182,12 +179,11 @@ const InvoiceTable = ({data}) => {
                   />
                 </TableCell>
 
-                <TableCell style={{display:"flex"}}>
-                  
+                <TableCell style={{ display: "flex" }}>
                   <Tooltip title="Edit">
                     <IconButton
                       color="primary"
-                        onClick={()=>getInvoice(invoice.invoiceId)}
+                      onClick={() => getInvoice(invoice.invoiceId)}
                     >
                       <EditIcon />
                     </IconButton>
@@ -195,20 +191,21 @@ const InvoiceTable = ({data}) => {
                   <Tooltip title="Delete">
                     <IconButton
                       color="error"
-                        onClick={() =>
-                          Swal.fire({
-                            icon: "question",
-                            title: "Are you sure you want to delete this customer?",
-                            showConfirmButton: true,
-                            confirmButtonText: "Yes",
-                            showCancelButton: true,
-                            cancelButtonText: "Cancel",
-                          }).then((res) => {
-                            if (res.isConfirmed) {
-                              DeleteInvoice(invoice.invoiceId);
-                            }
-                          })
-                        }
+                      onClick={() =>
+                        Swal.fire({
+                          icon: "question",
+                          title:
+                            "Are you sure you want to delete this customer?",
+                          showConfirmButton: true,
+                          confirmButtonText: "Yes",
+                          showCancelButton: true,
+                          cancelButtonText: "Cancel",
+                        }).then((res) => {
+                          if (res.isConfirmed) {
+                            DeleteInvoice(invoice.invoiceId);
+                          }
+                        })
+                      }
                     >
                       <DeleteIcon />
                     </IconButton>
@@ -228,7 +225,7 @@ const InvoiceTable = ({data}) => {
         rowsPerPage={limit}
         rowsPerPageOptions={[5, 10, 25]}
       />
-       <Link to="/createInvoice" ref={newInvoiceRef}/>
+      <Link to="/createInvoice" ref={newInvoiceRef} />
       <Outlet />
     </>
   );

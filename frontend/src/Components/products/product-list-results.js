@@ -40,6 +40,8 @@ import app_constants from "../../constants/constants";
 import Swal from "sweetalert2";
 import { DataContext } from "../Context/DataContext";
 import AddProductModal from "../modals/AddProductModal";
+import { APIRequest } from "../../API/APIRequest";
+import endpoints from "../../API/endpoints";
 
 export const ProductsListResults = ({ refreshproducts, ...rest }) => {
   const [selectedProductIds, setSelectedProductIds] = useState([]);
@@ -48,12 +50,10 @@ export const ProductsListResults = ({ refreshproducts, ...rest }) => {
   const [displayedProducts, setDisplayedProducts] = useState([]);
   const [currProduct, setCurrProduct] = useState({});
   const [openAddNewProduct, setOpenAddNewProduct] = useState(false);
-  
+
   const [isEdit, setIsEdit] = useState(false);
-  
 
-
-  const {products} = useContext(DataContext);
+  const { products } = useContext(DataContext);
 
   useEffect(() => {
     setDisplayedProducts(products);
@@ -126,47 +126,37 @@ export const ProductsListResults = ({ refreshproducts, ...rest }) => {
   //API Functions
 
   const GetProduct = async (id) => {
-    const res = await axios({
-      url: app_constants.API_URL + `api/Products/GetProduct?ID=${id}`,
-      method: "GET",
-      headers: {
-        Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
-      },
+    APIRequest.get(endpoints.GETPRODUCT + `?ID=${id}`).then((res) => {
+      if (res.status === app_constants.SUCCESS) {
+        console.log(res.data);
+        setOpenAddNewProduct(true);
+        setCurrProduct(res.data.data);
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error occured while fetching details of the product",
+          text: res.data.message,
+        });
+      }
     });
-    if (res.data.status == "Success") {
-      console.log(res.data);
-      setOpenAddNewProduct(true);
-      setCurrProduct(res.data.data);
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Error occured while fetching details of the product",
-        text: res.data.message,
-      });
-    }
   };
 
   const DeleteProduct = async (id) => {
-    const res = await axios({
-      url: app_constants.API_URL + `api/Products/DeleteProduct?ID=${id}`,
-      method: "POST",
-      headers: {
-        Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
-      },
+    APIRequest.post(endpoints.DELETEPRODUCT + `?ID=${id}`, "").then((res) => {
+      if (res.status === app_constants.SUCCESS) {
+        Swal.fire({
+          icon: "success",
+          title: "product successfully deleted",
+        });
+        refreshproducts();
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error occured while deleting product",
+          text: res.data.message,
+        });
+      }
     });
-    if (res.data.status == "Success") {
-      Swal.fire({
-        icon: "success",
-        title: "product successfully deleted",
-      });
-      refreshproducts();
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Error occured while deleting product",
-        text: res.data.message,
-      });
-    }
   };
 
   return (
@@ -201,7 +191,6 @@ export const ProductsListResults = ({ refreshproducts, ...rest }) => {
               variant="contained"
               onClick={() => {
                 setOpenAddNewProduct(true);
-                
               }}
             >
               Add products
@@ -348,7 +337,12 @@ export const ProductsListResults = ({ refreshproducts, ...rest }) => {
       />
 
       {/* Add new product Modal */}
-      <AddProductModal openAddNewProduct={openAddNewProduct} isEdit={isEdit} handleClose={handleClose} product={currProduct} />
+      <AddProductModal
+        openAddNewProduct={openAddNewProduct}
+        isEdit={isEdit}
+        handleClose={handleClose}
+        product={currProduct}
+      />
     </Card>
   );
 };

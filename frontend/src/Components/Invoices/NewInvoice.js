@@ -1,7 +1,6 @@
 import { Autocomplete, IconButton, TextField } from "@mui/material";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import PerfectScrollbar from "react-perfect-scrollbar";
-import Switch from "@mui/material/Switch";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -19,7 +18,7 @@ import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 
 import Invoice from "./Invoice";
 import { DataContext } from "../Context/DataContext";
-import { getAllCustomers } from "../../APIFunctions/GetAllCustomers";
+import { getAllCustomers } from "../../API/GetAllCustomers";
 import AddCustomerModal from "../modals/AddCustomerModal";
 
 const NewInvoice = () => {
@@ -59,6 +58,10 @@ const NewInvoice = () => {
       setCustomer(invoiceData.customer);
       setInvoiceNumber(invoiceData.invoiceNumber);
       setInvoiceDate(invoiceData.invoiceDate);
+      setInvoiceType(invoiceData.status);
+      if(invoiceData.status==="Credit")setShowAmountPaidOption(true);
+      setAmountPaid(invoiceData.amountPaid);
+      setAmountRemaining(invoiceData.totalAmount-invoiceData.amountPaid);
     }
   }, []);
 

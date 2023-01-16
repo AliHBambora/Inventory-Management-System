@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 import { useContext, useEffect, useState } from 'react';
 import InvoicesListResults from '../Invoices/InvoicesListResults.js';
 import { DataContext } from '../Context/DataContext.js';
-import { getAllInvoices } from '../../APIFunctions/GetAllInvoices.js';
+import { getAllInvoices } from '../../API/GetAllInvoices.js';
 
 const Invoices = () => {
   const {invoices,setInvoices} = useContext(DataContext);

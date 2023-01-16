@@ -19,10 +19,11 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import { DataContext } from "../Context/DataContext";
 import app_constants from "../../constants/constants";
-import { getAllProducts } from "../../APIFunctions/GetAllProducts";
+import { getAllProducts } from "../../API/GetAllProducts";
 import AddIcon from "@mui/icons-material/Add";
 import dayjs from "dayjs";
 import AddProductModal from "../modals/AddProductModal";
+import { APIRequest } from "../../API/APIRequest";
 
 const Invoice = ({
   invoiceDate,
@@ -54,6 +55,7 @@ const Invoice = ({
   const [subTotal, setSubTotal] = useState(null);
   const [discount, setDiscount] = useState(0);
   const [openAddNewProduct, setOpenAddNewProduct] = useState(false);
+  const [displayedProducts, setDisplayedProducts] = useState([]);
 
   const { products, setProducts } = useContext(DataContext);
 
@@ -74,9 +76,12 @@ const Invoice = ({
   useEffect(() => {
     getAllProducts().then((res) => {
       if (res.status == "success") {
+        console.log(res.data);
         setProducts(res.data);
+        setDisplayedProducts(res.data);
       }
     });
+
     if (sessionStorage.getItem("Invoice") != null) {
       var invoiceData = JSON.parse(sessionStorage.getItem("Invoice"));
       setInvoiceDetails(invoiceData.productList);
@@ -119,6 +124,9 @@ const Invoice = ({
   };
 
   const RemoveItem = (index) => {
+    var arr = displayedProducts;
+    arr.push(products.find(x=>x.id===invoiceDetails[index]?.id));
+    setDisplayedProducts(arr); 
     setInvoiceDetails(
       invoiceDetails.filter((item, i) => {
         return index !== i;
@@ -178,31 +186,25 @@ const Invoice = ({
                 )}`
               : "api/Invoices/AddInvoice";
           console.log(POSTOBJ);
-          const res = await axios({
-            url: app_constants.API_URL + URL,
-            method: "POST",
-            headers: {
-              Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
-            },
-            data: POSTOBJ,
-          });
-          if (res.data.status == "Success") {
-            Swal.fire({
-              icon: "success",
-              text: "Invoice generated successfully",
-              timer: 1000,
-            });
-            if (sessionStorage.getItem("Invoice") == null) {
-              setOpenInvoicePrintDialog(true);
-            }
-            
-          } else {
-            Swal.fire({
-              icon: "error",
-              text: res.data.Message,
-            });
-          }
-          console.log(invoiceDetails);
+          APIRequest.post(URL, POSTOBJ)
+            .then((res) => {
+              if (res.status === app_constants.SUCCESS) {
+                Swal.fire({
+                  icon: "success",
+                  text: "Invoice generated successfully",
+                  timer: 1000,
+                });
+                if (sessionStorage.getItem("Invoice") == null) {
+                  setOpenInvoicePrintDialog(true);
+                }
+              } else {
+                Swal.fire({
+                  icon: "error",
+                  text: res.data.Message,
+                });
+              }
+            })
+            .catch((err) => alert(err));
         }
       });
     }
@@ -210,16 +212,16 @@ const Invoice = ({
 
   const onProductSelection = (e, value, index) => {
     console.log(value);
+    console.log(invoiceDetails);
     invoiceDetails[index].id = value.id;
     invoiceDetails[index].name = value.name;
     invoiceDetails[index].Item = value.name;
     invoiceDetails[index].description = value.description;
     invoiceDetails[index].price = value.wholeSalePrice;
     setInvoiceDetails(invoiceDetails);
-    setToggle(!toggle);
+    setDisplayedProducts(products.filter((x) => !invoiceDetails.find((y) => x.id === y.id)));
+    // setDisplayedProducts(displayedProducts.filter((x) => x.id != value.id));
   };
-
-  const [toggle, setToggle] = useState(true);
 
   return (
     <div className="NewInvoice_InvoiceContainer" on>
@@ -244,17 +246,22 @@ const Invoice = ({
                 <Autocomplete
                   value={item}
                   freeSolo
+                  disableClearable
                   auto
                   onChange={(e, value) => onProductSelection(e, value, index)}
                   inputValue={item?.name}
-                  onInputChange={(event, newInputValue) => {
+                  onInputChange={(event, newInputValue, reason) => {
+                    console.log(event);
+                    if (reason === "clear") {
+                      alert(newInputValue);
+                    }
                     console.log(newInputValue);
                   }}
                   isOptionEqualToValue={(option, value) =>
                     option.name === value.name
                   }
                   id="combo-box-demo"
-                  options={products}
+                  options={displayedProducts}
                   getOptionLabel={(option) => option.name || ""}
                   style={{ width: 300 }}
                   renderInput={(params) => (

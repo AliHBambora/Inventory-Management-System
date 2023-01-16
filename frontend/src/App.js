@@ -12,32 +12,31 @@ import CreateNewInvoice from "./Components/pages/createNewInvoice";
 
 
 function App({ children }) {
-  const [isLocalStorageEmpty, setIsLocalStorageEmpty] = useState(true);
+  const [isSessionStorageEmpty, setIsSessionStorageEmpty] = useState(true);
 
   useEffect(() => {
     if (
-      localStorage.getItem("token") != null ||
-      localStorage.getItem("token") == ""
+      sessionStorage.getItem("token") != null ||
+      sessionStorage.getItem("token") == ""
     ) {
-      setIsLocalStorageEmpty(false);
+      setIsSessionStorageEmpty(false);
     }
-  }, [isLocalStorageEmpty]);
+  }, [isSessionStorageEmpty]);
 
-  return isLocalStorageEmpty ? (
+  return isSessionStorageEmpty ? (
     <Login
-      setValueOfisLocalStorageEmpty={(value) => setIsLocalStorageEmpty(value)}
+      setValueOfisLocalStorageEmpty={(value) => setIsSessionStorageEmpty(value)}
     />
   ) : (
     <>
       <DashboardLayout>
         {children}
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="dashboard" element={<Dashboard />} />
           <Route path="customers" element={<Customers />} />
           <Route path="products" element={<Products />} />
           <Route path="invoices" element={<Invoices />} />
           <Route path="createInvoice" element={<CreateNewInvoice />} />
-          
           <Route path="*" element={<Invalid />} />
         </Routes>
       </DashboardLayout>
