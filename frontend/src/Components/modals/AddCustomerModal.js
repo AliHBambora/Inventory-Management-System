@@ -16,8 +16,9 @@ import app_constants from "../../constants/constants";
 import { DataContext } from "../Context/DataContext";
 import { getAllCustomers } from "../../APIFunctions/GetAllCustomers";
 
-const AddCustomerModal = ({ open, CloseModal, isEdit,currCustomerID }) => {
+const AddCustomerModal = ({ open, CloseModal, isEdit, currCustomerID }) => {
   const [name, setName] = useState("");
+  const [customerNameError, setCustomerNameError] = useState(false);
   const [contact, setContact] = useState("");
   const [address, setAddress] = useState("");
   const [description, setDescription] = useState("");
@@ -43,7 +44,7 @@ const AddCustomerModal = ({ open, CloseModal, isEdit,currCustomerID }) => {
     setContact("");
     setDescription("");
     setAddress("");
-  }, [isEdit,open]);
+  }, [isEdit, open]);
 
   const refreshcustomers = () => {
     getAllCustomers().then((res) => {
@@ -54,7 +55,19 @@ const AddCustomerModal = ({ open, CloseModal, isEdit,currCustomerID }) => {
     });
   };
 
+  const validateCustomerEntries = () => {
+    var result = true;
+    if (name === "") {
+      setCustomerNameError(true);
+      result = false;
+    }
+    return result;
+  };
+
   const CreateCustomer = async () => {
+    if(!validateCustomerEntries()){
+      return;
+    }
     var formdata = new FormData();
     formdata.append("Name", name);
     formdata.append("Contact", contact);
@@ -158,15 +171,23 @@ const AddCustomerModal = ({ open, CloseModal, isEdit,currCustomerID }) => {
                 <div>
                   <TextField
                     id="newBatchName"
+                    size="small"
                     label="Name"
+                    required
+                    error={customerNameError}
+                    helperText={customerNameError ? "Enter customer name" : ""}
                     value={name}
                     onChange={(event) => {
                       setName(event.target.value);
+                      if(event.target.value!=""){
+                        setCustomerNameError(false);
+                      }
                     }}
                     sx={{ marginTop: "25px", width: "100%" }}
                   />
                   <TextField
                     id="newBatchNameAR"
+                    size="small"
                     label="Contact No"
                     value={contact}
                     onChange={(event) => {
@@ -176,6 +197,7 @@ const AddCustomerModal = ({ open, CloseModal, isEdit,currCustomerID }) => {
                   />
                   <TextField
                     id="newBatchNameAR"
+                    size="small"
                     label="Address"
                     value={address}
                     onChange={(event) => {
@@ -185,6 +207,7 @@ const AddCustomerModal = ({ open, CloseModal, isEdit,currCustomerID }) => {
                   />
                   <TextField
                     id="newBatchNameAR"
+                    size="small"
                     label="Description"
                     value={description}
                     onChange={(event) => {
@@ -212,7 +235,7 @@ const AddCustomerModal = ({ open, CloseModal, isEdit,currCustomerID }) => {
                     {isEdit ? "Update" : "Create"}
                   </Button>
                   <Button
-                    onClick={()=>CloseModal()}
+                    onClick={() => CloseModal()}
                     sx={{ color: "#fff", marginLeft: "15px" }}
                     color="error"
                     variant="contained"

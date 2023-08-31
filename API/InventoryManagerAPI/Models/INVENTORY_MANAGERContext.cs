@@ -49,9 +49,19 @@ namespace InventoryManagerAPI.Models
                     .ValueGeneratedNever()
                     .HasColumnName("InvoiceID");
 
+                entity.Property(e => e.AmountDue).HasColumnType("decimal(18, 4)");
+
+                entity.Property(e => e.AmountPaid).HasColumnType("decimal(18, 4)");
+
                 entity.Property(e => e.CustomerId).HasColumnName("CustomerID");
 
-                entity.Property(e => e.Profit).HasDefaultValueSql("(CONVERT([bigint],(0)))");
+                entity.Property(e => e.Discount).HasColumnType("decimal(18, 4)");
+
+                entity.Property(e => e.Profit)
+                    .HasColumnType("decimal(18, 4)")
+                    .HasDefaultValueSql("(CONVERT([bigint],(0)))");
+
+                entity.Property(e => e.TotalAmount).HasColumnType("decimal(18, 4)");
 
                 entity.HasOne(d => d.Customer)
                     .WithMany(p => p.Invoices)

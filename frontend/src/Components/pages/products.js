@@ -1,4 +1,4 @@
-import { Box, Container } from "@mui/material";
+import { Box, CircularProgress, Container } from "@mui/material";
 import axios from "axios";
 import { ProductsListResults } from "../products/product-list-results.js";
 
@@ -10,17 +10,14 @@ import { getAllProducts } from "../../APIFunctions/GetAllProducts.js";
 import { DataContext } from "../Context/DataContext.js";
 
 const Products = () => {
-  // useEffect(() => {
-  //   // console.log(products);
-  //   // if(products==null||products.length==0){
-  //   //   getAllProducts();
-  //   // }
-  //   getAllProducts();
-  // }, [])
   const { setProducts } = useContext(DataContext);
+  const [productsLoading, setProductsLoading] = useState(false);
 
   useEffect(() => {
+    setProductsLoading(true);
+    console.log("true");
     getAllProducts().then((res) => {
+      setProductsLoading(false);
       if (res.status == "success") {
         setProducts(res.data);
       }
@@ -29,20 +26,26 @@ const Products = () => {
 
   return (
     <>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          py: 8,
-        }}
-      >
-        <Container maxWidth={false}>
-          {/* <CustomerListToolbar refreshcustomers={getAllCustomers} customers={customers} setCustomersValue={(value)=>setCustomers(value)}  /> */}
-          <Box>
-            <ProductsListResults refreshproducts={getAllProducts} />
-          </Box>
-        </Container>
-      </Box>
+      {productsLoading ? (
+        <div style={{ display: "grid", placeItems: "center",height:"100vh",width:"100vw" }}>
+          <CircularProgress size={50} color="primary" />
+        </div>
+      ) : (
+        <Box
+          component="main"
+          sx={{
+            flexGrow: 1,
+            py: 2,
+          }}
+        >
+          <Container maxWidth={false}>
+            {/* <CustomerListToolbar refreshcustomers={getAllCustomers} customers={customers} setCustomersValue={(value)=>setCustomers(value)}  /> */}
+            <Box>
+              <ProductsListResults refreshproducts={getAllProducts} />
+            </Box>
+          </Container>
+        </Box>
+      )}
     </>
   );
 };

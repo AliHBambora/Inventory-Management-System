@@ -29,6 +29,8 @@ const InvoicePrintDialog = ({
   const handleClose = () => CloseDialog(false);
   const descriptionElementRef = useRef(null);
   useEffect(() => {
+    console.log(open);
+    console.log(invoiceDetails);
     if (open) {
       const { current: descriptionElement } = descriptionElementRef;
       if (descriptionElement !== null) {

@@ -38,6 +38,7 @@ const InvoiceFilterCard = () => {
                 ),
               }}
               focused
+              size="small"
               placeholder="Invoice Number"
               variant="outlined"
               //   onChange={handleSearchChange}
@@ -54,6 +55,7 @@ const InvoiceFilterCard = () => {
                 ),
               }}
               focused
+              size="small"
               placeholder="Customer Name"
               variant="outlined"
               
@@ -64,13 +66,13 @@ const InvoiceFilterCard = () => {
                 label="Issued From"
                 value={issuedFromDate}
                 onChange={(newValue) => setIssuedFromDate(newValue)}
-                renderInput={(params) => <TextField {...params} focused />}
+                renderInput={(params) => <TextField {...params} focused size="small" />}
               />
               <DateTimePicker
                 label="Issued To"
                 value={issuedToDate}
                 onChange={(newValue) => setIssuedToDate(newValue)}
-                renderInput={(params) => <TextField {...params} focused />}
+                renderInput={(params) => <TextField {...params} focused size="small" />}
               />
             </LocalizationProvider>
           </Box>

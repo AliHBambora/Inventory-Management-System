@@ -18,42 +18,74 @@ import Swal from "sweetalert2";
 import { getAllProducts } from "../../APIFunctions/GetAllProducts";
 import { DataContext } from "../Context/DataContext";
 
-
 const AddProductModal = ({
   openAddNewProduct,
   handleClose,
   isEdit,
-  product,
+  currentProductID,
 }) => {
   const [productNameError, setProductNameError] = useState(false);
   const [productWSPError, setProductWSPError] = useState(false);
   const [productRPError, setProductRPError] = useState(false);
   const [name, setName] = useState();
   const [quantity, setQuantity] = useState();
+  const [costPrice, setCostPrice] = useState(0);
   const [wholeSalePrice, setWholeSalePrice] = useState(0);
   const [retailPrice, setRetailPrice] = useState(0);
   const [description, setDescription] = useState();
-  const [unit, setUnit] = useState(1);
+  const [unit, setUnit] = useState("1");
 
-  const {products,setProducts} = useContext(DataContext);
+  const { products, setProducts, setShowToast, setToastType, setToastMessage } =
+    useContext(DataContext);
 
   useEffect(() => {
+    console.log(isEdit);
     if (isEdit) {
-      setName(product.name);
-      setQuantity(product.quantity);
-      setWholeSalePrice(product.wholeSalePrice);
-      setRetailPrice(product.retailPrice);
-      setDescription(product.description);
-      setUnit(product.unit);
+      GetProduct(currentProductID);
     } else {
       setName("");
       setQuantity(null);
       setDescription("");
       setWholeSalePrice(0);
       setRetailPrice(0);
-      setUnit(1);
+      setCostPrice(0);
+      setUnit("1");
+      setProductNameError(false);
+      setProductWSPError(false);
+      setProductRPError(false);
     }
-  }, []);
+  }, [isEdit, openAddNewProduct]);
+
+  //API Functions
+
+  const GetProduct = async (id) => {
+    const res = await axios({
+      url: app_constants.API_URL + `api/Products/GetProduct?ID=${id}`,
+      method: "GET",
+      headers: {
+        Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
+      },
+    });
+    if (res.data.status == "Success") {
+      console.log(res.data);
+      var product = res.data.result;
+      setName(product.name);
+      setQuantity(product.quantity);
+      setWholeSalePrice(product.wholeSalePrice);
+      setRetailPrice(product.retailPrice);
+      setDescription(product.description);
+      setUnit(product.quantityUnit);
+      setCostPrice(product.costPrice);
+      //setOpenAddNewProduct(true);
+      //setCurrProduct(res.data.data);
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Error occured while fetching details of the product",
+        text: res.data.message,
+      });
+    }
+  };
 
   const validateProductEntries = () => {
     var result = true;
@@ -72,13 +104,13 @@ const AddProductModal = ({
     return result;
   };
 
-  const refreshproducts = ()=>{
-    getAllProducts().then((res)=>{
-        if(res.status=="success"){
-          setProducts(res.data);
-        }
-      });
-  }
+  const refreshproducts = () => {
+    getAllProducts().then((res) => {
+      if (res.status == "success") {
+        setProducts(res.data);
+      }
+    });
+  };
 
   const CreateProduct = async () => {
     if (!validateProductEntries()) {
@@ -91,6 +123,7 @@ const AddProductModal = ({
       Description: description,
       WholeSalePrice: parseFloat(wholeSalePrice).toFixed(3),
       RetailPrice: parseFloat(retailPrice).toFixed(3),
+      CostPrice:parseFloat(costPrice).toFixed(3)
     };
     var formdata = new FormData();
     formdata.append("Product", JSON.stringify(PostObject));
@@ -119,17 +152,18 @@ const AddProductModal = ({
       }
     });
     if (res.data.status == "Success") {
-      Swal.fire({
-        icon: "success",
-        title: "Product added successfully",
-      });
+      // Swal.fire({
+      //   icon: "success",
+      //   title: "Product added successfully",
+      // });
+      setShowToast(true);
+      setToastType("success");
+      setToastMessage("Product added successfully");
       refreshproducts();
     } else {
-      Swal.fire({
-        icon: "error",
-        title: "Error Occured",
-        text: res.data.Message,
-      });
+      setShowToast(true);
+      setToastType("success");
+      setToastMessage(res.data.Message);
     }
     handleClose();
   };
@@ -140,8 +174,9 @@ const AddProductModal = ({
       Quantity: quantity,
       quantityUnit: unit,
       Description: description,
-      WholeSalePrice: parseFloat(wholeSalePrice),
-      RetailPrice: parseFloat(retailPrice),
+      WholeSalePrice: parseFloat(wholeSalePrice).toFixed(3),
+      RetailPrice: parseFloat(retailPrice).toFixed(3),
+      CostPrice:parseFloat(costPrice).toFixed(3)
     };
     // var formdata = new FormData();
     // formdata.append("Name", name);
@@ -157,17 +192,14 @@ const AddProductModal = ({
       data: PostObject,
     });
     if (res.data.status == "Success") {
-      Swal.fire({
-        icon: "success",
-        title: "Products details successfully updated",
-      });
+      setShowToast(true);
+      setToastType("success");
+      setToastMessage("Product details edited successfully");
       refreshproducts();
     } else {
-      Swal.fire({
-        icon: "error",
-        title: "Error occured while editing",
-        text: res.data.message,
-      });
+      setShowToast(true);
+      setToastType("success");
+      setToastMessage(res.data.message);
     }
     handleClose();
   };
@@ -204,6 +236,7 @@ const AddProductModal = ({
             <div>
               <TextField
                 id="newBatchName"
+                size="small"
                 focused
                 error={productNameError}
                 helperText={productNameError ? "Enter product name" : ""}
@@ -226,6 +259,7 @@ const AddProductModal = ({
               >
                 <TextField
                   id="newBatchNameAR"
+                  size="small"
                   focused
                   label="Quantity"
                   value={quantity}
@@ -239,19 +273,34 @@ const AddProductModal = ({
                   <InputLabel id="demo-simple-select-label">Unit</InputLabel>
                   <Select
                     labelId="demo-simple-select-label"
+                    size="small"
                     id="demo-simple-select"
                     value={unit}
                     label="Age"
                     onChange={(e) => setUnit(e.target.value)}
                   >
-                    <MenuItem value={0}>Pcs</MenuItem>
-                    <MenuItem value={1}>Doz</MenuItem>
+                    <MenuItem value={"0"}>Pcs</MenuItem>
+                    <MenuItem value={"1"}>Doz</MenuItem>
                   </Select>
                 </FormControl>
               </div>
+
               <TextField
                 focused
                 id="newBatchNameAR"
+                size="small"
+                label="Cost Price"
+                value={costPrice}
+                onChange={(event) => {
+                  setCostPrice(event.target.value);
+                }}
+                sx={{ marginTop: "25px", width: "100%" }}
+              />
+
+              <TextField
+                focused
+                id="newBatchNameAR"
+                size="small"
                 label="WholeSale Price"
                 required
                 value={wholeSalePrice}
@@ -263,10 +312,10 @@ const AddProductModal = ({
                 }}
                 sx={{ marginTop: "25px", width: "100%" }}
               />
-
               <TextField
                 focused
                 label="Retail Price"
+                size="small"
                 value={retailPrice}
                 required
                 error={productRPError}
@@ -280,6 +329,7 @@ const AddProductModal = ({
               <TextField
                 focused
                 id="newBatchNameAR"
+                size="small"
                 label="Description"
                 value={description}
                 onChange={(event) => {
@@ -296,7 +346,7 @@ const AddProductModal = ({
               <Button
                 onClick={() => {
                   if (isEdit) {
-                    EditProduct(product.id);
+                    EditProduct(currentProductID);
                   } else {
                     CreateProduct();
                   }
@@ -307,7 +357,7 @@ const AddProductModal = ({
                 {isEdit ? "Update" : "Create"}
               </Button>
               <Button
-                onClick={()=>handleClose()}
+                onClick={() => handleClose()}
                 sx={{ color: "#fff", marginLeft: "15px" }}
                 color="error"
                 variant="contained"

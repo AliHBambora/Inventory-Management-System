@@ -1,5 +1,5 @@
 // import './App.css';
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { DashboardLayout } from "./Components/dashboard-layout";
 import Login from "./Components/Login";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -9,10 +9,13 @@ import Dashboard from "./Components/pages/dashboard";
 import Products from "./Components/pages/products";
 import Invoices from "./Components/pages/invoices";
 import CreateNewInvoice from "./Components/pages/createNewInvoice";
+import { DataContext } from "./Components/Context/DataContext";
+import ToastNotification from "./Components/Notifications/ToastNotification";
 
 
 function App({ children }) {
   const [isLocalStorageEmpty, setIsLocalStorageEmpty] = useState(true);
+  const {showToast,toastType,toastMessage} = useContext(DataContext);
 
   useEffect(() => {
     if (
@@ -41,6 +44,8 @@ function App({ children }) {
           <Route path="*" element={<Invalid />} />
         </Routes>
       </DashboardLayout>
+      {/* Toast notification */}
+      <ToastNotification show={showToast} toastType={toastType} toastMessage={toastMessage} />
     </>
   );
 }

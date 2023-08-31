@@ -42,6 +42,26 @@ namespace InventoryManagerAPI.Controllers
 
         }
 
+        // GET: api/Customers/GetAllCustomers
+        [HttpGet]
+        public async Task<ActionResult<int>> GetCustomersCount()
+        {
+            if (_context.Customers == null)
+            {
+                return NotFound();
+            }
+            try
+            {
+                var result = _context.Customers.ToList();
+                return Ok(new { status = "success", data = result.Count });
+            }
+            catch (Exception e)
+            {
+                return Ok(new { status = "failed", message = e.Message });
+            }
+
+        }
+
         // GET: api/Customers/5
         [HttpGet]
         public async Task<ActionResult<Customer>> GetCustomer(Guid id)

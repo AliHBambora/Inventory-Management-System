@@ -8,15 +8,16 @@
 }
 
 .styled_table thead tr {
-  background-color: #009879;
+  background-color: #2e3e7c;
   color: #ffffff;
   text-align: left;
 }
 
 .styled_table th,
 .styled_table td {
-  padding: 12px 15px;
+  padding: 10px 12px;
   border: 1px solid black;
+  font-weight: normal;
   /* border-radius: 15px; */
 }
 

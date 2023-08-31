@@ -191,7 +191,7 @@ namespace InventoryManagerAPI.Controllers
                                 Status = aa.Key.Status,
                                 Comments = aa.Key.Comments,
                                 customer = aa.Key.Customer,
-                                AmountPaid = aa.Key.AmountPaid == null ? aa.Key.TotalAmount : (long)aa.Key.AmountPaid,
+                                AmountPaid = aa.Key.AmountPaid == null ? aa.Key.TotalAmount : (decimal)aa.Key.AmountPaid,
                                 productList = aa.Select(bb => new ProductDTO
                                 {
                                     name = bb.ProductName,
@@ -218,6 +218,11 @@ namespace InventoryManagerAPI.Controllers
             {
                 return Problem("Entity set 'DataContext.Products'  is null.");
             }
+            var res = _context.Invoices.FirstOrDefault(x => x.InvoiceNumber == invoiceDTO.InvoiceNumber);
+            if (res != null)
+            {
+                return Ok(new { status = "failed", Message = "Invoice with same number already created." });
+            }
             try
             {
                 var newInvoice = new Invoice
@@ -228,16 +233,24 @@ namespace InventoryManagerAPI.Controllers
                     InvoiceNumber = invoiceDTO.InvoiceNumber,
                     CustomerId = invoiceDTO.customer.CustomerId,
                     Status = invoiceDTO.Status,
-                    Profit = invoiceDTO.Profit,
+                    //Profit = invoiceDTO.Profit,
                     TotalAmount = invoiceDTO.TotalAmount,
                     Discount = invoiceDTO.Discount,
                     AmountPaid = invoiceDTO.AmountPaid,
                     AmountDue = invoiceDTO.TotalAmount - invoiceDTO.AmountPaid
                 };
                 _context.Invoices.Add(newInvoice);
-
+                decimal totalProfit = 0;
                 foreach (var item in invoiceDTO.productList)
                 {
+                    var product = _context.Products.FirstOrDefault(x => x.Id == item.id);
+                    if (product != null && product.CostPrice != null)
+                    {
+                        var costPrice = product.CostPrice * item.qty;
+                        var sellingPrice = item.price * item.qty;
+                        var profit = sellingPrice - costPrice;
+                        totalProfit += (decimal)profit;
+                    }
                     var invoiceProduct = new InvoiceProduct
                     {
                         Id = Guid.NewGuid(),
@@ -250,6 +263,7 @@ namespace InventoryManagerAPI.Controllers
                     };
                     _context.InvoiceProducts.Add(invoiceProduct);
                 }
+                newInvoice.Profit = (long)totalProfit;
                 await _context.SaveChangesAsync();
                 return Ok(new { status = "Success" });
             }
@@ -261,7 +275,7 @@ namespace InventoryManagerAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Product>> EditInvoice(Guid id,InvoiceDTO invoiceDTO)
+        public async Task<ActionResult<Product>> EditInvoice(Guid id, InvoiceDTO invoiceDTO)
         {
             if (_context.Invoices == null)
             {
@@ -334,12 +348,37 @@ namespace InventoryManagerAPI.Controllers
 
                 return Ok(new { status = "success" });
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return Ok(new { status = "failed", Message = e.Message });
             }
-            
+
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetThisMonthProfit()
+        {
+            if (_context.Invoices == null)
+            {
+                return NotFound();
+            }
+            try
+            {
+                decimal profit = 0;
+                var invoiceListOfthisMonth = _context.Invoices.Where(x=>x.InvoiceDate.Month==DateTime.Now.Month).ToList();
+                foreach(var item in invoiceListOfthisMonth)
+                {
+                    profit += item.Profit;
+                }
+                return Ok(new { status = "success", data = profit });
+            }
+            catch (Exception e)
+            {
+                return Ok(new { status = "failed", Message = e.Message });
+            }
+
+        }
+
 
         private bool InvoiceExists(Guid id)
         {

@@ -78,14 +78,14 @@ const InvoicesListResults = ({ ...rest }) => {
             </Button>
           </Box>
         </Box>
-        <Box sx={{ marginTop: "30px", marginBottom: "30px" }}>
-          <Box sx={{ marginTop: "20px" }}>
+        <Box sx={{ marginTop: "15px", marginBottom: "30px" }}>
+          <Box sx={{ marginTop: "10px" }}>
             <InvoiceFilterCard />
             <Card>
-              <CardContent style={{ backgroundColor: "#f9fafc" }}>
+              <CardContent sx={{ backgroundColor: "#f9fafc",padding:0}}>
                 {/* Tab structure for type of invoices ie. Pending,Paid */}
                 <Box
-                  sx={{ width: "100%", typography: "body1", marginTop: "15px" }}
+                  sx={{ width: "100%", typography: "body1"}}
                 >
                   <TabContext value={tabvalue}>
                     <Box sx={{ borderBottom: 1, borderColor: "divider" }}>

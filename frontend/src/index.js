@@ -7,15 +7,17 @@ import { theme } from "./theme/index";
 import { ThemeProvider } from "@mui/material/styles";
 import { BrowserRouter as Router } from "react-router-dom";
 import { DataProvider } from "./Components/Context/DataContext";
+import "./fonts/Poppins-Bold.ttf";
+import "./fonts/Poppins-Regular.ttf";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <DataProvider>
-      <Router>
-        <App />
-      </Router>
+        <Router>
+          <App />
+        </Router>
       </DataProvider>
     </ThemeProvider>
   </React.StrictMode>

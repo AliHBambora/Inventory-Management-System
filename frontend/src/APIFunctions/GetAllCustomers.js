@@ -31,7 +31,7 @@ export class APIFunction {
     });
     if (res.data.status === "success") {
       console.log(res.data);
-      return { status: "success", data: res.data.result };
+      return { status: "success", data: res.data.data };
     } else {
       return { status: "failed", Message: res.data.Message };
     }

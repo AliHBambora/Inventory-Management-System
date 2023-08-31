@@ -45,7 +45,7 @@ export const CustomerListResults = ({
   ...rest
 }) => {
   const [selectedCustomerIds, setSelectedCustomerIds] = useState([]);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(0);
   const [displayedCustomers, setDisplayedCustomers] = useState([]);
   const [currCustomerID, setCurrCustomerID] = useState("");
@@ -164,7 +164,7 @@ export const CustomerListResults = ({
             background: "#f9fafc",
           }}
         >
-          <Typography sx={{ m: 1 }} variant="h4">
+          <Typography sx={{ m: 1 }} variant="h5">
             Customers
           </Typography>
           <Box sx={{ m: 1 }}>
@@ -189,8 +189,8 @@ export const CustomerListResults = ({
             </Button>
           </Box>
         </Box>
-        <Box sx={{ marginTop:"30px",marginBottom:"30px" }}>
-          <Card>
+        {/* <Box sx={{ marginTop:"30px",marginBottom:"30px" }}> */}
+          <Card sx={{ marginTop:"10px",marginBottom:"10px" }}>
             <CardContent style={{ padding: "15px", borderRadius: "10px" }}>
               <Box sx={{ maxWidth: 500 }}>
                 <TextField
@@ -207,14 +207,15 @@ export const CustomerListResults = ({
                   placeholder="Search customer"
                   variant="outlined"
                   onChange={handleSearchChange}
+                  size="small"
                 />
               </Box>
             </CardContent>
           </Card>
-        </Box>
+        {/* </Box> */}
         <Box sx={{ minWidth: 1050 }}>
           <Table>
-            <TableHead>
+            <TableHead sx={{fontSize:"16px"}}>
               <TableRow>
                 <TableCell padding="checkbox">
                   <Checkbox
@@ -264,7 +265,7 @@ export const CustomerListResults = ({
                       >
                         {getInitials(customer.name)}
                       </Avatar>
-                      <Typography color="textPrimary" variant="body1">
+                      <Typography color="textPrimary" variant="body2" sx={{fontWeight:600}}>
                         {customer.name}
                       </Typography>
                     </Box>
@@ -279,6 +280,7 @@ export const CustomerListResults = ({
                         onClick={() => {
                           setIsEdit(true);
                           setOpenAddNewCustomer(true);
+                           console.log(customer);
                           setCurrCustomerID(customer.customerId);
                         }}
                       >
@@ -330,6 +332,6 @@ export const CustomerListResults = ({
   );
 };
 
-CustomerListResults.propTypes = {
-  customers: PropTypes.array.isRequired,
-};
+// CustomerListResults.propTypes = {
+//   customers: PropTypes.array.isRequired,
+// };

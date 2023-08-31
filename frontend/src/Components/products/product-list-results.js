@@ -40,20 +40,19 @@ import app_constants from "../../constants/constants";
 import Swal from "sweetalert2";
 import { DataContext } from "../Context/DataContext";
 import AddProductModal from "../modals/AddProductModal";
+import ToastNotification from "../Notifications/ToastNotification";
 
 export const ProductsListResults = ({ refreshproducts, ...rest }) => {
   const [selectedProductIds, setSelectedProductIds] = useState([]);
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(5);
   const [page, setPage] = useState(0);
   const [displayedProducts, setDisplayedProducts] = useState([]);
-  const [currProduct, setCurrProduct] = useState({});
+  const [currProductID, setCurrProductID] = useState("");
   const [openAddNewProduct, setOpenAddNewProduct] = useState(false);
-  
+
   const [isEdit, setIsEdit] = useState(false);
-  
 
-
-  const {products} = useContext(DataContext);
+  const { products } = useContext(DataContext);
 
   useEffect(() => {
     setDisplayedProducts(products);
@@ -121,29 +120,7 @@ export const ProductsListResults = ({ refreshproducts, ...rest }) => {
 
   const handleClose = () => {
     setOpenAddNewProduct(false);
-  };
-
-  //API Functions
-
-  const GetProduct = async (id) => {
-    const res = await axios({
-      url: app_constants.API_URL + `api/Products/GetProduct?ID=${id}`,
-      method: "GET",
-      headers: {
-        Authorization: "Bearer ".concat(sessionStorage.getItem("token")),
-      },
-    });
-    if (res.data.status == "Success") {
-      console.log(res.data);
-      setOpenAddNewProduct(true);
-      setCurrProduct(res.data.data);
-    } else {
-      Swal.fire({
-        icon: "error",
-        title: "Error occured while fetching details of the product",
-        text: res.data.message,
-      });
-    }
+    setIsEdit(false);
   };
 
   const DeleteProduct = async (id) => {
@@ -201,36 +178,36 @@ export const ProductsListResults = ({ refreshproducts, ...rest }) => {
               variant="contained"
               onClick={() => {
                 setOpenAddNewProduct(true);
-                
               }}
             >
               Add products
             </Button>
           </Box>
         </Box>
-        <Box sx={{ marginTop: "30px", marginBottom: "30px" }}>
-          <Card>
-            <CardContent style={{ padding: "15px", borderRadius: "10px" }}>
-              <Box sx={{ maxWidth: 500, backgroundColor: "#ffffff" }}>
-                <TextField
-                  fullWidth
-                  InputProps={{
-                    startAdornment: (
-                      <InputAdornment position="start">
-                        <SvgIcon color="action" fontSize="small">
-                          <SearchIcon />
-                        </SvgIcon>
-                      </InputAdornment>
-                    ),
-                  }}
-                  placeholder="Search product"
-                  variant="outlined"
-                  onChange={handleSearchChange}
-                />
-              </Box>
-            </CardContent>
-          </Card>
-        </Box>
+        {/* <Box sx={{ marginTop: "15px", marginBottom: "15px" }}> */}
+        <Card sx={{ marginTop: "10px", marginBottom: "10px" }}>
+          <CardContent style={{ padding: "15px", borderRadius: "10px" }}>
+            <Box sx={{ maxWidth: 500, backgroundColor: "#ffffff" }}>
+              <TextField
+                fullWidth
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SvgIcon color="action" fontSize="small">
+                        <SearchIcon />
+                      </SvgIcon>
+                    </InputAdornment>
+                  ),
+                }}
+                placeholder="Search product"
+                variant="outlined"
+                onChange={handleSearchChange}
+                size="small"
+              />
+            </Box>
+          </CardContent>
+        </Card>
+        {/* </Box> */}
         <Box sx={{ minWidth: 1050 }}>
           <Table>
             <TableHead>
@@ -280,11 +257,11 @@ export const ProductsListResults = ({ refreshproducts, ...rest }) => {
                     >
                       <Avatar
                         src={product.avatarUrl}
-                        sx={{ mr: 2, background: "#2e3e7c" }}
+                        sx={{ mr: 2, background: "#2e3e7c",fontSize:12  }}
                       >
                         {getInitials(product.name)}
                       </Avatar>
-                      <Typography color="textPrimary" variant="body1">
+                      <Typography color="textPrimary" variant="body2" sx={{fontWeight:600}}>
                         {product.name}
                       </Typography>
                     </Box>
@@ -302,7 +279,8 @@ export const ProductsListResults = ({ refreshproducts, ...rest }) => {
                         color="primary"
                         onClick={() => {
                           setIsEdit(true);
-                          GetProduct(product.id);
+                          setOpenAddNewProduct(true);
+                          setCurrProductID(product.id);
                         }}
                       >
                         <EditIcon />
@@ -348,11 +326,13 @@ export const ProductsListResults = ({ refreshproducts, ...rest }) => {
       />
 
       {/* Add new product Modal */}
-      <AddProductModal openAddNewProduct={openAddNewProduct} isEdit={isEdit} handleClose={handleClose} product={currProduct} />
+      <AddProductModal
+        openAddNewProduct={openAddNewProduct}
+        isEdit={isEdit}
+        handleClose={handleClose}
+        currentProductID={currProductID}
+      />
+      
     </Card>
   );
-};
-
-ProductsListResults.propTypes = {
-  products: PropTypes.array.isRequired,
 };

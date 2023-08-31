@@ -7,6 +7,9 @@ import tableStyles from "../../styles/invoice.module.css";
 
 class InvoicePrint extends Component {
   render() {
+    console.log(this.props.invoiceNumber);
+    console.log(this.props.invoiceDetails);
+
     return (
       <div className={styles.MainContainer}>
         <div className={styles.InvoiceTitleContainer}>
@@ -38,7 +41,7 @@ class InvoicePrint extends Component {
             <Typography variant="h5" style={{ marginRight: "5px" }}>
               Date
             </Typography>
-            <Typography variant="h6">{this.props.invoiceDate.format('YYYY-MM-DD [at] HH:mm:ss')}</Typography>
+            {/* <Typography variant="h6">{this.props.invoiceDate.format('YYYY-MM-DD [at] HH:mm:ss')}</Typography> */}
           </div>
         </div>
 
@@ -58,11 +61,11 @@ class InvoicePrint extends Component {
               {this.props.invoiceDetails.map((item, index) => (
                 <tr>
                   <td>{index + 1}</td>
-                  <td>{item.Item}</td>
-                  <td>{item.Description}</td>
-                  <td>{item.Qty}</td>
-                  <td>{item.Price}</td>
-                  <td>{item.Total}</td>
+                  <td>{item.Item==null?item.name:item.Item}</td>
+                  <td>{item.description}</td>
+                  <td>{item.qty}</td>
+                  <td>{item.price}</td>
+                  <td>{item.total}</td>
                 </tr>
               ))}
             </tbody>

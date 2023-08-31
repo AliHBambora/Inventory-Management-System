@@ -1,7 +1,18 @@
-body {
+body,html {
   margin: 0;
-  padding:0;
+  padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-family: Poppins;
 }
 
+@font-face {
+  font-family: "Poppins";
+  src: local("Poppins"), url("./fonts/Poppins-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Poppins Bold";
+  src: local("Poppins"), url("./fonts/Poppins-Bold.ttf") format("truetype");
+  font-weight: bold;
+}

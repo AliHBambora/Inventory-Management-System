@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using InventoryManagerAPI.Models;
 using Newtonsoft.Json;
+using InventoryManagerAPI.DTO;
 
 namespace InventoryManagerAPI.Controllers
 {
@@ -30,10 +31,10 @@ namespace InventoryManagerAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetAllProducts()
         {
-          if (_context.Products == null)
-          {
-              return NotFound();
-          }
+            if (_context.Products == null)
+            {
+                return NotFound();
+            }
             try
             {
                 var result = _context.Products.ToList();
@@ -82,6 +83,7 @@ namespace InventoryManagerAPI.Controllers
                     Existingproduct.RetailPrice = product.RetailPrice;
                     Existingproduct.Quantity = product.Quantity;
                     Existingproduct.QuantityUnit = product.QuantityUnit;
+                    Existingproduct.CostPrice = product.CostPrice;
                 }
                 await _context.SaveChangesAsync();
                 return Ok(new { status = "Success" });
@@ -155,9 +157,63 @@ namespace InventoryManagerAPI.Controllers
             }
         }
 
+        [HttpGet]
+        public async Task<ActionResult> GetTopSellingProducts()
+        {
+            try
+            {
+                var from = HttpContext.Request.Form["from"];
+                var to = HttpContext.Request.Form["to"];
+                DateTime start = DateTime.Parse(from);
+                DateTime end = DateTime.Parse(to);
+                GetTopSellingProductsInDateRange(start, end);
+                return Ok(new { status = "Success" });
+            }
+            catch (Exception e)
+            {
+                return Ok(new { status = "failed", message = e.Message });
+            }
+        }
+
         private bool ProductExists(Guid id)
         {
             return (_context.Products?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+
+        private void GetTopSellingProductsInDateRange(DateTime start, DateTime end)
+        {
+            var query = (from inv in _context.Invoices
+                         join invp in _context.InvoiceProducts
+                         on inv.InvoiceId equals invp.InvoiceId
+                         where inv.InvoiceDate >= start && inv.InvoiceDate <= end
+                         select new
+                         {
+                             Product = invp.Product,
+                             ProductID = invp.ProductId,
+                             ProductQuantity = invp.ProductQuantity,
+                             ProductQuantityUnit = invp.ProductQuantityUnit
+                         }).GroupBy(x => new
+                         {
+                             x.ProductID,
+                             x.Product
+                             //x.ProductQuantity,
+                             //x.ProductQuantityUnit
+                         }).Select(aa => new { 
+                            Product  =aa.Key.Product
+                         }).ToList();
+            //}).GroupBy(x => new
+            //{
+            //    x.ProductID,
+            //    x.Product,
+            //    x.ProductQuantity,
+            //    x.ProductQuantityUnit
+            //}).Select(aa => new ProductDTO
+            //{
+            //    name = aa.Key.Product.Name,
+            //    qty = (int)aa.Key.Product.Quantity,
+
+            //}).ToList();
+            //return query;
         }
     }
 }

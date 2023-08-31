@@ -59,6 +59,16 @@ const NewInvoice = () => {
       setCustomer(invoiceData.customer);
       setInvoiceNumber(invoiceData.invoiceNumber);
       setInvoiceDate(invoiceData.invoiceDate);
+      setInvoiceType(invoiceData.status);
+      setInvoiceTotal(invoiceData.totalAmount);
+      if (invoiceData.status === "Credit") {
+        setShowAmountPaidOption(true);
+        setAmountPaid(invoiceData.amountPaid);
+        setAmountRemaining(invoiceData.totalAmount-invoiceData.amountPaid);
+      } else {
+        setShowAmountPaidOption(false);
+        setAmountPaid(invoiceTotal);
+      }
     }
   }, []);
 
@@ -86,6 +96,7 @@ const NewInvoice = () => {
               error={invoiceNumberError}
               helperText={invoiceNumberError ? "Enter Invoice number" : ""}
               focused
+              size="small"
               style={{ width: "30%" }}
               id="outlined-name"
               label="Invoice Number"
@@ -105,11 +116,13 @@ const NewInvoice = () => {
                 id="demo-simple-select"
                 value={invoiceType}
                 label="Invoice Type"
+                size="small"
                 onChange={(e) => {
                   setInvoiceType(e.target.value);
                   if (e.target.value === "Credit") {
                     setShowAmountPaidOption(true);
                     setAmountPaid(0);
+                    setAmountRemaining(invoiceTotal);
                   } else {
                     setShowAmountPaidOption(false);
                     setAmountPaid(invoiceTotal);
@@ -125,12 +138,13 @@ const NewInvoice = () => {
               <DateTimePicker
                 label="Date"
                 value={invoiceDate}
+                
                 onChange={(newValue) => {
                   setInvoiceDate(newValue);
                   console.log(newValue);
                 }}
                 renderInput={(params) => (
-                  <TextField sx={{ width: "30%" }} {...params} focused />
+                  <TextField sx={{ width: "30%" }} {...params} size="small" focused />
                 )}
               />
             </LocalizationProvider>
@@ -142,6 +156,7 @@ const NewInvoice = () => {
             <Autocomplete
               style={{width:"100%"}}
               value={customer}
+              size="small"
               onChange={(event, newValue) => {
                 console.log(newValue);
                 setCustomer(newValue);
@@ -176,6 +191,7 @@ const NewInvoice = () => {
             {/* <div style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between"}} hidden={!showAmountPaidOption}> */}
             <TextField
               fullWidth
+              size="small"
               style={
                 showAmountPaidOption
                   ? { display: "block", width: "30%" }
@@ -194,6 +210,7 @@ const NewInvoice = () => {
 
             <TextField
               fullWidth
+              size="small"
               focused
               style={
                 showAmountPaidOption

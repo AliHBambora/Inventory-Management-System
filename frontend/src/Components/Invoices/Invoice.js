@@ -37,7 +37,8 @@ const Invoice = ({
   const [openInvoicePrintDialog, setOpenInvoicePrintDialog] = useState(false);
   const [inputValue, setinputValue] = useState("");
   const [selectedProduct, setSelectedProduct] = useState();
-
+  const { setShowToast, setToastType, setToastMessage } =
+    useContext(DataContext);
   const [invoiceDetails, setInvoiceDetails] = useState([
     {
       id: "",
@@ -96,7 +97,7 @@ const Invoice = ({
       var result = 0;
       lineItems.map((item) => (result = result + item.total));
       setSubTotal(result);
-      setGrandTotal(result - discount);
+      setGrandTotal(parseFloat(result - discount).toFixed(3));
       getTotalAmount(result - discount);
     }
     console.log(lineItems);
@@ -187,20 +188,25 @@ const Invoice = ({
             data: POSTOBJ,
           });
           if (res.data.status == "Success") {
-            Swal.fire({
-              icon: "success",
-              text: "Invoice generated successfully",
-              timer: 1000,
-            });
+            // Swal.fire({
+            //   icon: "success",
+            //   text: "Invoice generated successfully",
+            //   timer: 1000,
+            // });
+            setShowToast(true);
+            setToastType("success");
+            setToastMessage("Invoice generated successfully");
             if (sessionStorage.getItem("Invoice") == null) {
               setOpenInvoicePrintDialog(true);
             }
-            
           } else {
-            Swal.fire({
-              icon: "error",
-              text: res.data.Message,
-            });
+            // Swal.fire({
+            //   icon: "error",
+            //   text: res.data.message,
+            // });
+            setShowToast(true);
+            setToastType("error");
+            setToastMessage(res.data.message);
           }
           console.log(invoiceDetails);
         }
